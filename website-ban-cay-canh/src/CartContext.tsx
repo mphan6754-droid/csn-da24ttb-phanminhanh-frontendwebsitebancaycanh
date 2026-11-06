@@ -4,6 +4,7 @@ export type CartProduct = {
   id: number;
   name: string;
   price: number;
+  image?: string;
 };
 
 type CartItem = CartProduct & {
@@ -15,6 +16,7 @@ type CartContextValue = {
   addToCart: (product: CartProduct) => void;
   changeQuantity: (productId: number, amount: number) => void;
   removeFromCart: (productId: number) => void;
+  clearCart: () => void;
 };
 
 export const CartContext = createContext<CartContextValue | null>(null);

@@ -6,28 +6,57 @@ function AccountMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<AuthMode>("login");
   const [message, setMessage] = useState("");
+  const [activeEmail, setActiveEmail] = useState(
+    () => sessionStorage.getItem("green-garden-user-email") ?? ""
+  );
+  const [activeName, setActiveName] = useState(
+    () => sessionStorage.getItem("green-garden-user-name") ?? ""
+  );
 
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
 
     if (mode === "register") {
-      const formData = new FormData(event.currentTarget);
       if (formData.get("password") !== formData.get("passwordConfirm")) {
         setMessage("Mật khẩu nhập lại chưa khớp.");
         return;
       }
     }
 
-    setMessage(
+    const name =
       mode === "register"
-        ? "Đây là giao diện đăng ký còn đang phát triển."
-        : "Đây là giao diện đăng nhập còn đang phát triển."
-    );
+        ? String(formData.get("name") ?? "").trim()
+        : email.split("@")[0];
+
+    try {
+      sessionStorage.setItem("green-garden-user-email", email);
+      sessionStorage.setItem("green-garden-user-name", name);
+      setActiveEmail(email);
+      setActiveName(name);
+      setMessage(
+        mode === "register"
+          ? "Tạo tài khoản mô phỏng thành công."
+          : "Đăng nhập mô phỏng thành công."
+      );
+    } catch (error) {
+      console.error("Không thể lưu trạng thái tài khoản trong phiên:", error);
+      setMessage("Trình duyệt không cho phép lưu phiên tài khoản này.");
+    }
   };
 
   const changeMode = (nextMode: AuthMode) => {
     setMode(nextMode);
     setMessage("");
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("green-garden-user-email");
+    sessionStorage.removeItem("green-garden-user-name");
+    setActiveEmail("");
+    setActiveName("");
+    setMessage("Bạn đã đăng xuất.");
   };
 
   return (
@@ -37,26 +66,45 @@ function AccountMenu() {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-controls="account-panel"
-        className="rounded-lg bg-green-700 px-5 py-2 text-white hover:bg-green-800"
+        className="rounded-full border border-[#d7dbd0] px-4 py-2 text-sm font-medium text-[#314c39] transition hover:border-[#9ca994] hover:bg-[#edf0e8]"
       >
-        Tài khoản
+        {activeEmail ? `Xin chào, ${activeName || activeEmail}` : "Tài khoản"}
       </button>
 
       {isOpen && (
         <section
           id="account-panel"
           aria-label="Đăng nhập hoặc đăng ký"
-          className="absolute right-0 top-full z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-green-100 bg-white p-5 text-gray-800 shadow-xl"
+          className="absolute right-0 top-full z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-[#e7e5dc] bg-[#fffefa] p-5 text-[#27352c] shadow-[0_16px_50px_rgba(39,53,44,0.14)]"
         >
-          <div className="mb-4 grid grid-cols-2 rounded-lg bg-green-50 p-1">
+          {activeEmail ? (
+            <div>
+              <h2 className="font-serif text-2xl text-[#314c39]">
+                Tài khoản của bạn
+              </h2>
+              <p className="mt-2 break-all text-sm text-[#687168]">{activeEmail}</p>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="mt-4 w-full rounded-full border border-[#d7dbd0] px-4 py-2.5 text-sm font-semibold text-[#314c39] hover:bg-[#edf0e8]"
+              >
+                Đăng xuất
+              </button>
+              <p aria-live="polite" className="mt-3 text-sm text-[#687168]">
+                {message || "Tài khoản đang ở chế độ mô phỏng trên trình duyệt này."}
+              </p>
+            </div>
+          ) : (
+          <>
+          <div className="mb-4 grid grid-cols-2 rounded-full bg-[#f0f1e9] p-1">
             <button
               type="button"
               onClick={() => changeMode("login")}
               aria-pressed={mode === "login"}
               className={`rounded-md px-3 py-2 text-sm font-semibold ${
                 mode === "login"
-                  ? "bg-green-700 text-white"
-                  : "text-green-800 hover:bg-green-100"
+                  ? "bg-[#314c39] text-white"
+                  : "text-[#526254] hover:bg-white"
               }`}
             >
               Đăng nhập
@@ -67,15 +115,15 @@ function AccountMenu() {
               aria-pressed={mode === "register"}
               className={`rounded-md px-3 py-2 text-sm font-semibold ${
                 mode === "register"
-                  ? "bg-green-700 text-white"
-                  : "text-green-800 hover:bg-green-100"
+                  ? "bg-[#314c39] text-white"
+                  : "text-[#526254] hover:bg-white"
               }`}
             >
               Đăng ký
             </button>
           </div>
 
-          <h2 className="mb-4 text-xl font-bold text-green-800">
+          <h2 className="mb-4 font-serif text-2xl text-[#314c39]">
             {mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}
           </h2>
 
@@ -94,7 +142,7 @@ function AccountMenu() {
                   type="text"
                   autoComplete="name"
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100"
+                  className="w-full rounded-xl border border-[#deded4] px-3 py-2 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
                 />
               </div>
             )}
@@ -112,7 +160,7 @@ function AccountMenu() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100"
+                className="w-full rounded-xl border border-[#deded4] px-3 py-2 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
               />
             </div>
 
@@ -130,9 +178,9 @@ function AccountMenu() {
                 autoComplete={
                   mode === "register" ? "new-password" : "current-password"
                 }
-                minLength={mode === "register" ? 8 : undefined}
+                minLength={mode === "register" ? 9 : undefined}
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100"
+                className="w-full rounded-xl border border-[#deded4] px-3 py-2 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
               />
               {mode === "register" && (
                 <p className="mt-1 text-xs text-gray-500">
@@ -156,23 +204,25 @@ function AccountMenu() {
                   autoComplete="new-password"
                   minLength={9}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100"
+                  className="w-full rounded-xl border border-[#deded4] px-3 py-2 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
                 />
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-green-700 px-4 py-2.5 font-semibold text-white hover:bg-green-800"
+              className="w-full rounded-full bg-[#314c39] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#243c2c]"
             >
               {mode === "login" ? "Đăng nhập" : "Đăng ký"}
             </button>
           </form>
 
-          <p aria-live="polite" className="mt-3 text-sm leading-5 text-gray-600">
+          <p aria-live="polite" className="mt-3 text-sm leading-5 text-[#687168]">
             {message ||
-              "Website còn đang phát triển nên chưa lưu tài khoản hoặc mật khẩu."}
+              "Đăng nhập và đăng ký hiện chỉ mang tính mô phỏng. Mật khẩu không được lưu và chức năng chưa kết nối với máy chủ."}
           </p>
+          </>
+          )}
         </section>
       )}
     </div>

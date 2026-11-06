@@ -1,18 +1,74 @@
 @import "tailwindcss";
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
+  --font-serif: "Segoe UI", Arial, sans-serif;
+  --font-sans: "Segoe UI", Arial, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #27352c;
+  background: #f8f7f2;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: #f8f7f2;
+}
+
+header.sticky {
+  border-bottom-color: #d3ddcf;
+  background: linear-gradient(105deg, #edf3e9 0%, #fffefa 48%, #f5f0e5 100%);
+  box-shadow: 0 4px 18px rgb(39 53 44 / 8%);
+}
+
+header.sticky nav a[aria-current="page"] {
+  border-radius: 9999px;
+  background: #314c39;
+  padding: 8px 14px;
+  color: #fffefa;
+  box-shadow: 0 3px 10px rgb(49 76 57 / 18%);
+}
+
+header.sticky nav a:not([aria-current="page"]):hover {
+  border-radius: 9999px;
+  background: rgb(49 76 57 / 8%);
+}
+
+header.sticky nav > div > button {
+  background: #fffefa;
+  border-color: #d3ddcf;
+}
+
+header.sticky nav > div > button:hover {
+  background: #e8efe5;
+  border-color: #9eaf99;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  color: #fff;
+  background: #41694b;
 }

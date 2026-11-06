@@ -33,7 +33,7 @@ function loadCart(): CartItem[] {
   }
 }
 
-export function CartProvider({ children }: { children: ReactNode }) {
+export function QuanLyGioHang({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(loadCart);
 
   useEffect(() => {
@@ -77,9 +77,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const clearCart = () => setItems([]);
+
   return (
     <CartContext.Provider
-      value={{ items, addToCart, changeQuantity, removeFromCart }}
+      value={{ items, addToCart, changeQuantity, removeFromCart, clearCart }}
     >
       {children}
     </CartContext.Provider>

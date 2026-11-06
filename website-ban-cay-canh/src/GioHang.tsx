@@ -22,10 +22,10 @@ export function CartMenu() {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-controls="cart-panel"
-        className="relative rounded-lg border border-green-200 bg-white px-4 py-2 font-semibold text-green-800 hover:bg-green-50"
+        className="relative rounded-full border border-[#d7dbd0] bg-transparent px-4 py-2 text-sm font-medium text-[#314c39] transition hover:border-[#9ca994] hover:bg-[#edf0e8]"
       >
         Giỏ hàng
-        <span className="ml-2 inline-flex min-w-6 items-center justify-center rounded-full bg-green-700 px-1.5 py-0.5 text-xs text-white">
+        <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-[#314c39] px-1.5 py-0.5 text-[11px] text-white">
           {itemCount}
         </span>
       </button>
@@ -34,14 +34,14 @@ export function CartMenu() {
         <section
           id="cart-panel"
           aria-label="Giỏ hàng"
-          className="absolute right-0 top-full z-50 mt-3 w-[min(24rem,calc(100vw-2rem))] rounded-2xl border border-green-100 bg-white p-5 text-gray-800 shadow-xl"
+          className="absolute right-0 top-full z-50 mt-3 w-[min(24rem,calc(100vw-2rem))] rounded-2xl border border-[#e7e5dc] bg-[#fffefa] p-5 text-[#27352c] shadow-[0_16px_50px_rgba(39,53,44,0.14)]"
         >
-          <h2 className="mb-4 text-xl font-bold text-green-900">
+          <h2 className="mb-4 font-serif text-2xl text-[#314c39]">
             Giỏ hàng của bạn
           </h2>
 
           {items.length === 0 ? (
-            <div className="rounded-xl bg-green-50 px-4 py-8 text-center">
+            <div className="rounded-xl bg-[#f0f1e9] px-4 py-8 text-center">
               <p className="text-3xl" aria-hidden="true">
                 🪴
               </p>
@@ -49,7 +49,7 @@ export function CartMenu() {
                 Giỏ hàng đang trống
               </p>
               <p className="mt-1 text-sm text-gray-500">
-                Hãy thêm sản phẩm bạn thích vào giỏ hàng nhé.
+                Hãy thêm sản phẩm bạn yêu thích vào giỏ hàng nhé.
               </p>
             </div>
           ) : (
@@ -62,7 +62,7 @@ export function CartMenu() {
                   >
                     <div className="min-w-0">
                       <h3 className="truncate font-semibold">{item.name}</h3>
-                      <p className="mt-1 text-sm text-green-800">
+                      <p className="mt-1 text-sm text-[#526a51]">
                         {formatPrice(item.price)}
                       </p>
                       <div className="mt-2 flex items-center gap-2">
@@ -70,7 +70,7 @@ export function CartMenu() {
                           type="button"
                           onClick={() => changeQuantity(item.id, -1)}
                           aria-label={`Giảm số lượng ${item.name}`}
-                          className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-300 hover:bg-gray-100"
+                          className="flex h-7 w-7 items-center justify-center rounded-full border border-[#d7dbd0] hover:bg-[#edf0e8]"
                         >
                           -
                         </button>
@@ -84,7 +84,7 @@ export function CartMenu() {
                           type="button"
                           onClick={() => changeQuantity(item.id, 1)}
                           aria-label={`Tăng số lượng ${item.name}`}
-                          className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-300 hover:bg-gray-100"
+                          className="flex h-7 w-7 items-center justify-center rounded-full border border-[#d7dbd0] hover:bg-[#edf0e8]"
                         >
                           +
                         </button>
@@ -97,7 +97,7 @@ export function CartMenu() {
                       <button
                         type="button"
                         onClick={() => removeFromCart(item.id)}
-                        className="mt-2 text-sm text-red-600 hover:text-red-800"
+                        className="mt-2 text-sm text-[#9a564b] hover:text-[#723b33]"
                       >
                         Xóa
                       </button>
@@ -106,15 +106,18 @@ export function CartMenu() {
                 ))}
               </ul>
 
-              <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
-                <span className="font-semibold">Thanh toán</span>
-                <span className="text-lg font-bold text-green-800">
+              <div className="mt-4 flex items-center justify-between border-t border-[#e7e5dc] pt-4">
+                <span className="font-semibold">Tổng tiền</span>
+                <span className="text-lg font-semibold text-[#314c39]">
                   {formatPrice(total)}
                 </span>
               </div>
-              <p className="mt-3 text-xs leading-5 text-gray-500">
-                Giỏ hàng còn trong giai đoạn phát triển.
-              </p>
+              <a
+                href="/thanh-toan"
+                className="mt-4 block w-full rounded-full bg-[#314c39] px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#243c2c]"
+              >
+                Thanh toán
+              </a>
             </>
           )}
         </section>
