@@ -14,10 +14,12 @@ export default function ThanhToan() {
   const { items, clearCart } = useCart();
   const [savedOrder, setSavedOrder] = useState<Order | null>(null);
   const [submitError, setSubmitError] = useState("");
+  // Tính toán tổng tiền, phí vận chuyển và tổng cộng
   const subtotal = items.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
+  // Phí vận chuyển: miễn phí nếu tổng tiền >= 500.000 VND, ngược lại là 20.000 VND
   const shipping = subtotal >= 500000 || subtotal === 0 ? 0 : 20000;
   const total = subtotal + shipping;
 
@@ -44,7 +46,7 @@ export default function ThanhToan() {
       shipping,
       total,
     };
-
+// Lưu đơn hàng vào localStorage và cập nhật trạng thái savedOrder, đồng thời xóa giỏ hàng
     try {
       saveOrder(order);
       setSavedOrder(order);
@@ -54,13 +56,17 @@ export default function ThanhToan() {
       setSubmitError("Không thể lưu đơn hàng trên trình duyệt. Vui lòng thử lại.");
     }
   };
-
+// Trả về JSX để hiển thị trang thanh toán
   return (
     <div className="min-h-screen bg-[#f8f7f2] text-[#27352c]">
       <header className="sticky top-0 z-40 border-b border-[#e7e5dc] bg-[#f8f7f2]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <a href="/" className="font-serif text-lg font-semibold tracking-wide text-[#263b2d]">GREEN GARDEN</a>
+          <a href="/" className="flex items-center gap-3 font-serif text-lg font-semibold tracking-wide text-[#263b2d]" aria-label="Green Garden - Trang chủ">
+            <img src="/images/logo%20website.jpg" alt="" className="h-12 w-12 shrink-0 rounded-full bg-white object-contain" />
+            <span>GREEN GARDEN</span>
+          </a>
           <nav aria-label="Điều hướng chính" className="flex flex-wrap items-center gap-3 text-sm sm:gap-6">
+            <a href="/" className="text-[#59645b] hover:text-[#314c39]">Trang chủ</a>
             <a href="/san-pham" className="text-[#59645b] hover:text-[#314c39]">Sản phẩm</a>
             <a href="/gioi-thieu" className="text-[#59645b] hover:text-[#314c39]">Về chúng tôi</a>
             <a href="/don-hang" className="text-[#59645b] hover:text-[#314c39]">Đơn hàng của tôi</a>
@@ -70,7 +76,7 @@ export default function ThanhToan() {
           </nav>
         </div>
       </header>
-
+// Hiển thị nội dung chính của trang thanh toán
       <main className="mx-auto max-w-5xl px-5 py-12 sm:px-8 md:py-16">
         {savedOrder ? (
           <section className="mx-auto max-w-2xl rounded-2xl border border-[#dce4d8] bg-white p-8 sm:p-10">
@@ -79,7 +85,7 @@ export default function ThanhToan() {
             <div className="mt-3 leading-7 text-[#687168]">
               Mã đơn hàng: <strong>{savedOrder.code}</strong>.
               <br />
-              Website đang trong quá trình phát triển, nên đây chỉ là mô phỏng.
+              Website đang trong quá trình phát triển.
             </div>
             <div className="mt-6 grid gap-6 border-y border-[#e7e5dc] py-6 sm:grid-cols-2">
               <div>
@@ -118,10 +124,9 @@ export default function ThanhToan() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#78836f]">GREEN GARDEN</p>
             <h1 className="mt-3 font-serif text-4xl text-[#263b2d]">Thông tin thanh toán</h1>
             <p className="mt-3 text-sm leading-6 text-[#747a70]">
-              Đây là quy trình đặt hàng mô phỏng. Thông tin chỉ được lưu trên
-              trình duyệt, không gửi đến cửa hàng và không phát sinh giao dịch thật.
+              Đây là quy trình đặt hàng mô phỏng.
             </p>
-
+// Hiển thị biểu mẫu thông tin nhận hàng và tóm tắt đơn hàng
             <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
               <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-[#e2e0d7] bg-white p-6 sm:p-8">
                 <h2 className="font-serif text-2xl text-[#314c39]">Thông tin nhận hàng</h2>
@@ -137,21 +142,22 @@ export default function ThanhToan() {
                   <label htmlFor="checkout-address" className="mb-1 block text-sm font-medium">Địa chỉ nhận hàng</label>
                   <textarea id="checkout-address" name="address" autoComplete="street-address" rows={3} required className="w-full rounded-xl border border-[#deded4] px-3 py-3 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]" />
                 </div>
+                {/* Hiển thị các phương thức thanh toán mô phỏng */}
                 <fieldset>
-                  <legend className="mb-2 text-sm font-medium">Phương thức thanh toán (mô phỏng)</legend>
+                  <legend className="mb-2 text-sm font-medium">Phương thức thanh toán</legend>
                   <label className="flex items-center gap-3 rounded-xl border border-[#deded4] p-3 text-sm">
                     <input type="radio" name="payment" value="cod" defaultChecked />
                     Thanh toán khi nhận hàng
                   </label>
                   <label className="mt-2 flex items-center gap-3 rounded-xl border border-[#deded4] p-3 text-sm">
                     <input type="radio" name="payment" value="transfer" />
-                    Chuyển khoản (mô phỏng)
+                    Chuyển khoảng
                   </label>
                 </fieldset>
                 {submitError && <p role="alert" className="text-sm text-red-700">{submitError}</p>}
                 <button type="submit" className="w-full rounded-full bg-[#314c39] px-5 py-3 font-semibold text-white transition hover:bg-[#243c2c]">Xác nhận đặt hàng</button>
               </form>
-
+              {/* Hiển thị tóm tắt đơn hàng, bao gồm danh sách sản phẩm, tạm tính, phí giao hàng và tổng cộng */}
               <aside className="h-fit rounded-2xl border border-[#e2e0d7] bg-white p-6">
                 <h2 className="font-serif text-2xl text-[#314c39]">Đơn hàng</h2>
                 <ul className="mt-4 space-y-3">

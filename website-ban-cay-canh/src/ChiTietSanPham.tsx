@@ -2,17 +2,17 @@ import AccountMenu from "./Dangnhap/Dangky";
 import { useCart } from "./CartContext";
 import { CartMenu } from "./GioHang";
 import { getProductImage, products } from "./SanPham";
-
+// Hàm formatPrice để định dạng giá sản phẩm theo định dạng tiền tệ Việt Nam
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
   }).format(price);
-
+// Component ChiTietSanPham hiển thị chi tiết sản phẩm dựa trên productId
 export default function ChiTietSanPham({ productId }: { productId: number }) {
   const product = products.find((item) => item.id === productId);
   const { addToCart } = useCart();
-
+// Nếu không tìm thấy sản phẩm, hiển thị thông báo lỗi và liên kết quay lại danh sách sản phẩm
   if (!product) {
     return (
       <main className="mx-auto max-w-3xl px-5 py-20 text-center">
@@ -21,16 +21,20 @@ export default function ChiTietSanPham({ productId }: { productId: number }) {
       </main>
     );
   }
-
+// Nếu tìm thấy sản phẩm, hiển thị chi tiết sản phẩm bao gồm hình ảnh, tên, giá, mô tả và thông tin chăm sóc hoặc sử dụng
   const image = getProductImage(product.id);
   const isPlant = product.group !== "Dụng cụ chăm sóc";
-
+// Trả về JSX để hiển thị chi tiết sản phẩm
   return (
     <div className="min-h-screen bg-[#f8f7f2] text-[#27352c]">
       <header className="sticky top-0 z-40 border-b border-[#e7e5dc] bg-[#f8f7f2]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <a href="/" className="font-serif text-lg font-semibold tracking-wide text-[#263b2d]">GREEN GARDEN</a>
+          <a href="/" className="flex items-center gap-3 font-serif text-lg font-semibold tracking-wide text-[#263b2d]" aria-label="Green Garden - Trang chủ">
+            <img src="/images/logo%20website.jpg" alt="" className="h-12 w-12 shrink-0 rounded-full bg-white object-contain" />
+            <span>GREEN GARDEN</span>
+          </a>
           <nav aria-label="Điều hướng chính" className="flex flex-wrap items-center gap-3 text-sm sm:gap-6">
+            <a href="/" className="text-[#59645b] hover:text-[#314c39]">Trang chủ</a>
             <a href="/san-pham" className="font-semibold text-[#314c39]">Sản phẩm</a>
             <a href="/gioi-thieu" className="text-[#59645b] hover:text-[#314c39]">Về chúng tôi</a>
             <a href="/lien-he" className="text-[#59645b] hover:text-[#314c39]">Liên hệ</a>
@@ -39,7 +43,7 @@ export default function ChiTietSanPham({ productId }: { productId: number }) {
           </nav>
         </div>
       </header>
-
+  {/* Hiển thị chi tiết sản phẩm */}
       <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8 md:py-16">
         <a href="/san-pham" className="text-sm font-medium text-[#526a51] hover:underline">← Quay lại danh sách sản phẩm</a>
         <div className="mt-6 grid gap-10 md:grid-cols-2 md:items-start md:gap-14">
@@ -58,7 +62,7 @@ export default function ChiTietSanPham({ productId }: { productId: number }) {
               {product.description}
             </p>
             {product.origin && <p className="mt-3 text-sm text-[#747a70]">Xuất xứ: {product.origin}</p>}
-
+       {/* Nút thêm vào giỏ hàng */}
             <button
               type="button"
               onClick={() => addToCart({ id: product.id, name: product.name, price: product.price, image })}
@@ -66,7 +70,7 @@ export default function ChiTietSanPham({ productId }: { productId: number }) {
             >
               Thêm vào giỏ hàng
             </button>
-
+            <p className="mt-3 text-sm text-[#747a70]">Sản phẩm sẽ được thêm vào giỏ hàng của bạn.</p>
             <div className="mt-9 rounded-2xl bg-[#f0f1e9] p-5 sm:p-6">
               <h2 className="font-serif text-2xl text-[#314c39]">{isPlant ? "Thông tin chăm sóc" : "Thông tin sử dụng"}</h2>
               <div className="mt-4 space-y-2 text-sm leading-6 text-[#59645b]">

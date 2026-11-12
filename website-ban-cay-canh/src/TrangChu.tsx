@@ -6,29 +6,28 @@ import { productGroups, products } from "./SanPham";
 const featuredProducts = products.filter((product) =>
   [1, 6, 9, 11].includes(product.id)
 );
-
+// Mô tả cho từng nhóm sản phẩm
 const groupDescriptions: Record<string, string> = {
   "Cây mini": "Chậu cây nhỏ xinh, phù hợp với bàn học và bàn làm việc.",
   "Cây văn phòng": "Thêm sắc xanh dịu mắt cho không gian làm việc.",
   "Cây phong thủy": "Những loại cây được yêu thích để trang trí hoặc làm quà.",
   "Dụng cụ chăm sóc": "Vật dụng cần thiết giúp việc chăm cây thuận tiện hơn.",
 };
-
+// Component TrangChu hiển thị trang chủ của website bán cây cảnh
 export default function TrangChu() {
   return (
     <div className="min-h-screen bg-[#f8f7f2] text-[#27352c]">
       <header className="sticky top-0 z-40 border-b border-[#e7e5dc] bg-[#f8f7f2]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <a href="/" className="flex items-center gap-3" aria-label="Green Garden - Trang chủ">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#314c39] font-serif text-sm font-bold text-[#f8f7f2]">
-              gg
-            </span>
+            <img src="/images/logo%20website.jpg" alt="" className="h-12 w-12 shrink-0 rounded-full bg-white object-contain" />
             <span>
               <span className="block font-serif text-lg font-semibold tracking-wide text-[#263b2d]">GREEN GARDEN</span>
               <span className="block text-[10px] uppercase tracking-[0.2em] text-[#7b8177]">Cây xanh cho nhà mình</span>
             </span>
           </a>
           <nav aria-label="Điều hướng chính" className="flex flex-wrap items-center gap-3 text-sm sm:gap-6">
+            <a href="/" aria-current="page" className="font-semibold text-[#314c39]">Trang chủ</a>
             <a href="/san-pham" className="text-[#59645b] hover:text-[#314c39]">Sản phẩm</a>
             <a href="/gioi-thieu" className="text-[#59645b] hover:text-[#314c39]">Về chúng tôi</a>
             <a href="/don-hang" className="text-[#59645b] hover:text-[#314c39]">Đơn hàng của tôi</a>
@@ -38,11 +37,10 @@ export default function TrangChu() {
           </nav>
         </div>
       </header>
-
       <main>
         <section className="relative isolate flex min-h-[440px] items-center overflow-hidden px-5 py-16 sm:min-h-[520px] sm:px-8">
           <img
-            src="/images/banner-gioithieu.jpg"
+            src={`/images/${encodeURIComponent("banner trang chủ.jpg")}`}
             alt=""
             aria-hidden="true"
             className="absolute inset-0 -z-20 h-full w-full object-cover"
@@ -55,7 +53,8 @@ export default function TrangChu() {
               <span className="sm:block">nhỏ về nhà</span>
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-white/90 sm:text-lg">
-              Chọn một chậu cây dễ chăm, phù hợp với không gian sống và nhịp sinh hoạt của bạn.
+              Chọn một chậu cây dễ chăm, phù hợp với không gian sống và{" "}
+              <span className="whitespace-nowrap">nhịp sinh hoạt</span> của bạn.
             </p>
             <a
               href="/san-pham"
@@ -65,7 +64,7 @@ export default function TrangChu() {
             </a>
           </div>
         </section>
-
+        {/* Hiển thị các nhóm sản phẩm nổi bật với liên kết đến danh sách sản phẩm tương ứng */}
         <section className="mx-auto max-w-7xl px-5 py-14 sm:px-8 md:py-18">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -88,7 +87,7 @@ export default function TrangChu() {
             ))}
           </div>
         </section>
-
+        {/* Hiển thị các sản phẩm nổi bật được yêu thích với liên kết đến chi tiết sản phẩm */}
         <section className="bg-[#f1f0e9] px-5 py-14 sm:px-8 md:py-18">
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-wrap items-end justify-between gap-4">
@@ -105,7 +104,7 @@ export default function TrangChu() {
             </div>
           </div>
         </section>
-
+        {/* Hiển thị các mẹo chăm sóc cây đơn giản cho người mới bắt đầu */}
         <section className="mx-auto grid max-w-7xl gap-8 px-5 py-14 sm:px-8 md:grid-cols-[0.8fr_1.2fr] md:items-center md:py-20">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#78836f]">Chăm cây thật đơn giản</p>
@@ -133,7 +132,6 @@ export default function TrangChu() {
           </div>
         </section>
       </main>
-
       <footer className="bg-[#24382b] px-5 py-8 text-center text-sm text-[#b8c2b6] sm:px-8">
         <p className="font-serif text-lg text-[#e7e9e1]">GREEN GARDEN</p>
         <p className="mt-2">Cây xanh cho nhà mình · Vĩnh Long, Việt Nam</p>

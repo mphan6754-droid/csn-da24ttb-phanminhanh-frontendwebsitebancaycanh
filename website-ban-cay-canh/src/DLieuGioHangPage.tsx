@@ -1,13 +1,13 @@
 import AccountMenu from "./Dangnhap/Dangky";
 import { useCart } from "./CartContext";
 import { CartMenu } from "./GioHang";
-
+// Hàm formatPrice để định dạng giá sản phẩm theo định dạng tiền tệ Việt Nam
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
   }).format(price);
-
+// Component GioHangPage hiển thị trang giỏ hàng
 export default function GioHangPage() {
   const { items, changeQuantity, removeFromCart } = useCart();
   const subtotal = items.reduce(
@@ -15,15 +15,17 @@ export default function GioHangPage() {
     0
   );
   const shipping = subtotal >= 500000 || subtotal === 0 ? 0 : 20000;
-
+// Trả về JSX để hiển thị trang giỏ hàng
   return (
     <div className="min-h-screen bg-[#f8f7f2] text-[#27352c]">
       <header className="sticky top-0 z-40 border-b border-[#e7e5dc] bg-[#f8f7f2]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <a href="/" className="font-serif text-lg font-semibold tracking-wide text-[#263b2d]">
-            GREEN GARDEN
+          <a href="/" className="flex items-center gap-3 font-serif text-lg font-semibold tracking-wide text-[#263b2d]" aria-label="Green Garden - Trang chủ">
+            <img src="/images/logo%20website.jpg" alt="" className="h-12 w-12 shrink-0 rounded-full bg-white object-contain" />
+            <span>GREEN GARDEN</span>
           </a>
           <nav aria-label="Điều hướng chính" className="flex flex-wrap items-center gap-3 text-sm sm:gap-6">
+            <a href="/" className="text-[#59645b] hover:text-[#314c39]">Trang chủ</a>
             <a href="/san-pham" className="text-[#59645b] hover:text-[#314c39]">Sản phẩm</a>
             <a href="/gioi-thieu" className="text-[#59645b] hover:text-[#314c39]">Về chúng tôi</a>
             <a href="/lien-he" className="text-[#59645b] hover:text-[#314c39]">Liên hệ</a>
@@ -36,7 +38,6 @@ export default function GioHangPage() {
       <main className="mx-auto max-w-5xl px-5 py-12 sm:px-8 md:py-16">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#78836f]">GREEN GARDEN</p>
         <h1 className="mt-3 font-serif text-4xl text-[#263b2d]">Giỏ hàng của bạn</h1>
-
         {items.length === 0 ? (
           <section className="mt-8 rounded-2xl border border-[#e2e0d7] bg-white p-8 text-center">
             <p className="font-serif text-2xl text-[#314c39]">Giỏ hàng đang trống</p>
@@ -70,7 +71,6 @@ export default function GioHangPage() {
               ))}
               <a href="/san-pham" className="inline-block pt-2 text-sm font-medium text-[#526a51] underline underline-offset-4">← Tiếp tục mua sắm</a>
             </section>
-
             <aside className="h-fit rounded-2xl border border-[#e2e0d7] bg-white p-6">
               <h2 className="font-serif text-2xl text-[#314c39]">Tóm tắt đơn hàng</h2>
               <div className="mt-5 space-y-3 text-sm">
@@ -86,7 +86,7 @@ export default function GioHangPage() {
               <a href="/thanh-toan" className="mt-6 block rounded-full bg-[#314c39] px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#243c2c]">
                 Tiến hành thanh toán
               </a>
-              <p className="mt-3 text-center text-xs text-[#85887e]">Thanh toán mô phỏng, không phát sinh giao dịch thật.</p>
+              <p className="mt-3 text-center text-xs text-[#85887e]">Thanh toán mô phỏng.</p>
             </aside>
           </div>
         )}

@@ -1,4 +1,5 @@
 export type Order = {
+  // Mã đơn hàng
   code: string;
   createdAt: string;
   status: "pending" | "cancelled";
@@ -7,6 +8,7 @@ export type Order = {
     phone: string;
     address: string;
   };
+  // Danh sách sản phẩm trong đơn hàng
   items: {
     id: number;
     name: string;
@@ -17,9 +19,9 @@ export type Order = {
   shipping: number;
   total: number;
 };
-
+// Khóa lưu trữ đơn hàng trong localStorage
 const STORAGE_KEY = "green-garden-orders";
-
+// Kiểm tra xem một giá trị có phải là đơn hàng hợp lệ hay không
 function isOrder(value: unknown): value is Order {
   if (typeof value !== "object" || value === null) return false;
   const order = value as Partial<Order>;
@@ -38,11 +40,11 @@ function isOrder(value: unknown): value is Order {
     typeof order.total === "number"
   );
 }
-
+// Tải danh sách đơn hàng từ localStorage
 export function loadOrders(): Order[] {
   const savedOrders = localStorage.getItem(STORAGE_KEY);
   if (!savedOrders) return [];
-
+// Nếu không có dữ liệu đơn hàng trong localStorage, trả về mảng rỗng
   const parsed: unknown = JSON.parse(savedOrders);
   if (!Array.isArray(parsed) || !parsed.every(isOrder)) {
     throw new Error("Dữ liệu lịch sử đơn hàng không đúng định dạng.");
@@ -52,12 +54,12 @@ export function loadOrders(): Order[] {
     status: order.status ?? "pending",
   }));
 }
-
+// Lưu đơn hàng mới vào localStorage, thêm vào đầu danh sách đơn hàng
 export function saveOrder(order: Order) {
   const orders = loadOrders();
   localStorage.setItem(STORAGE_KEY, JSON.stringify([order, ...orders]));
 }
-
+// Xóa đơn hàng theo mã đơn hàng
 export function deleteOrder(orderCode: string) {
   const orders = loadOrders();
   localStorage.setItem(
@@ -65,7 +67,7 @@ export function deleteOrder(orderCode: string) {
     JSON.stringify(orders.filter((order) => order.code !== orderCode))
   );
 }
-
+// Hủy đơn hàng theo mã đơn hàng, thay đổi trạng thái thành "cancelled"
 export function cancelOrder(orderCode: string) {
   const orders = loadOrders();
   localStorage.setItem(

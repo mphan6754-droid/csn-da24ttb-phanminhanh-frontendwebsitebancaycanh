@@ -1,22 +1,22 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { CartContext, type CartProduct } from "./CartContext";
-
+// Định nghĩa kiểu dữ liệu cho một sản phẩm trong giỏ hàng, bao gồm thông tin cơ bản và số lượng
 type CartItem = CartProduct & {
   quantity: number;
 };
-
+// Khởi tạo key để lưu trữ giỏ hàng trong localStorage
 const STORAGE_KEY = "green-garden-cart";
-
+// Hàm loadCart để tải giỏ hàng từ localStorage
 function loadCart(): CartItem[] {
   const savedCart = localStorage.getItem(STORAGE_KEY);
   if (!savedCart) return [];
-
+// Nếu không có dữ liệu giỏ hàng trong localStorage, trả về mảng rỗng
   try {
     const parsed: unknown = JSON.parse(savedCart);
     if (!Array.isArray(parsed)) {
       throw new Error("Dữ liệu giỏ hàng không đúng định dạng.");
     }
-
+// Lọc các phần tử không hợp lệ và chỉ giữ lại các phần tử hợp lệ
     return parsed.filter(
       (item): item is CartItem =>
         typeof item === "object" &&
@@ -45,8 +45,10 @@ export function QuanLyGioHang({ children }: { children: ReactNode }) {
   }, [items]);
 
   const addToCart = (product: CartProduct) => {
+    // Cập nhật giỏ hàng: nếu sản phẩm đã có trong giỏ, tăng số lượng; nếu chưa, thêm sản phẩm mới với số lượng 1
     setItems((currentItems) => {
       const existingItem = currentItems.find((item) => item.id === product.id);
+      // Nếu sản phẩm đã có trong giỏ, tăng số lượng
       if (existingItem) {
         return currentItems.map((item) =>
           item.id === product.id
@@ -70,7 +72,7 @@ export function QuanLyGioHang({ children }: { children: ReactNode }) {
         .filter((item) => item.quantity > 0)
     );
   };
-
+// Xóa sản phẩm khỏi giỏ hàng dựa trên productId
   const removeFromCart = (productId: number) => {
     setItems((currentItems) =>
       currentItems.filter((item) => item.id !== productId)
@@ -78,8 +80,9 @@ export function QuanLyGioHang({ children }: { children: ReactNode }) {
   };
 
   const clearCart = () => setItems([]);
-
+// Cung cấp dữ liệu giỏ hàng và các hàm quản lý giỏ hàng thông qua context
   return (
+    //cung cấp dữ liệu các hàm giỏ hàng nhờ vậy có thể dùng useCart
     <CartContext.Provider
       value={{ items, addToCart, changeQuantity, removeFromCart, clearCart }}
     >

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { CartMenu } from "./GioHang";
 import { cancelOrder, deleteOrder, loadOrders, type Order } from "./DlieuDonhangStorage";
-
+// Hàm formatPrice để định dạng giá tiền theo chuẩn Việt Nam
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
   }).format(price);
-
+// Component DonHang hiển thị trang quản lý đơn hàng
 export default function DonHang() {
   const [orderState, setOrderState] = useState(() => {
     try {
@@ -21,12 +21,12 @@ export default function DonHang() {
     }
   });
   const { orders, error } = orderState;
-
+// Hàm xử lý xóa đơn hàng khỏi lịch sử mô phỏng
   const handleDeleteOrder = (orderCode: string) => {
     if (!window.confirm(`Bạn có chắc muốn xóa đơn ${orderCode} khỏi lịch sử mô phỏng?`)) {
       return;
     }
-
+// Cập nhật trạng thái orderState và xóa đơn hàng khỏi localStorage
     try {
       deleteOrder(orderCode);
       setOrderState((current) => ({
@@ -41,12 +41,12 @@ export default function DonHang() {
       }));
     }
   };
-
+// Hàm xử lý hủy đơn hàng, thay đổi trạng thái đơn hàng thành "cancelled"
   const handleCancelOrder = (orderCode: string) => {
     if (!window.confirm(`Bạn có chắc muốn hủy đơn ${orderCode} không?`)) {
       return;
     }
-
+// Cập nhật trạng thái orderState và hủy đơn hàng trong localStorage
     try {
       cancelOrder(orderCode);
       setOrderState((current) => ({
@@ -63,13 +63,17 @@ export default function DonHang() {
       }));
     }
   };
-
+// Trả về JSX để hiển thị trang quản lý đơn hàng
   return (
     <div className="min-h-screen bg-[#f8f7f2] text-[#27352c]">
       <header className="sticky top-0 z-40 border-b border-[#e7e5dc] bg-[#f8f7f2]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <a href="/" className="font-serif text-lg font-semibold tracking-wide text-[#263b2d]">GREEN GARDEN</a>
+          <a href="/" className="flex items-center gap-3 font-serif text-lg font-semibold tracking-wide text-[#263b2d]" aria-label="Green Garden - Trang chủ">
+            <img src="/images/logo%20website.jpg" alt="" className="h-12 w-12 shrink-0 rounded-full bg-white object-contain" />
+            <span>GREEN GARDEN</span>
+          </a>
           <nav aria-label="Điều hướng chính" className="flex flex-wrap items-center gap-3 text-sm sm:gap-6">
+            <a href="/" className="text-[#59645b] hover:text-[#314c39]">Trang chủ</a>
             <a href="/san-pham" className="text-[#59645b] hover:text-[#314c39]">Sản phẩm</a>
             <a href="/gioi-thieu" className="text-[#59645b] hover:text-[#314c39]">Về chúng tôi</a>
             <a href="/don-hang" aria-current="page" className="font-semibold text-[#314c39]">Đơn hàng của tôi</a>
@@ -77,15 +81,12 @@ export default function DonHang() {
           </nav>
         </div>
       </header>
-
       <main className="mx-auto max-w-5xl px-5 py-12 sm:px-8 md:py-16">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#78836f]">GREEN GARDEN</p>
         <h1 className="mt-3 font-serif text-4xl text-[#263b2d]">Đơn hàng của tôi</h1>
         <p className="mt-3 text-sm leading-6 text-[#747a70]">
-          Lịch sử này được lưu trên trình duyệt hiện tại. Đây là dữ liệu mô phỏng,
-          không phải đơn hàng thật gửi đến cửa hàng.
+         Đây là dữ liệu mô phỏng.
         </p>
-
         {error ? (
           <p role="alert" className="mt-8 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>
         ) : orders.length === 0 ? (
@@ -128,7 +129,6 @@ export default function DonHang() {
                     </button>
                   </div>
                 </div>
-
                 <div className="grid gap-5 py-5 sm:grid-cols-2">
                   <div>
                     <h3 className="text-sm font-semibold text-[#314c39]">Người nhận</h3>
@@ -148,8 +148,7 @@ export default function DonHang() {
                     </ul>
                   </div>
                 </div>
-
-                <div className="space-y-2 border-t border-[#e7e5dc] pt-4 text-sm">
+                <div className="space-y-3 border-t border-[#e7e5dc] pt-4 text-sm">
                   <div className="flex justify-between"><span>Tạm tính</span><span>{formatPrice(order.subtotal)}</span></div>
                   <div className="flex justify-between"><span>Giao hàng</span><span>{order.shipping === 0 ? "Miễn phí" : formatPrice(order.shipping)}</span></div>
                   <div className="flex justify-between border-t border-[#e7e5dc] pt-3 text-base font-semibold">

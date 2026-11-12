@@ -7,20 +7,20 @@ function GioiThieu() {
       <header className="sticky top-0 z-40 border-b border-[#e7e5dc] bg-[#f8f7f2]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <a href="/" className="flex items-center gap-3" aria-label="Green Garden - Trang chủ">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#314c39] font-serif text-sm font-bold tracking-tight text-[#f8f7f2]">
-              gg
-            </span>
+            <img src="/images/logo%20website.jpg" alt="" className="h-12 w-12 shrink-0 rounded-full bg-white object-contain" />
             <span>
               <span className="block font-serif text-lg font-semibold tracking-wide text-[#263b2d]">
                 GREEN GARDEN
               </span>
               <span className="block text-[10px] uppercase tracking-[0.2em] text-[#7b8177]">
-                Cây xanh cho nhà mình
+                Thêm sắc xanh cho không gian sống
               </span>
             </span>
           </a>
-
           <nav aria-label="Điều hướng chính" className="flex flex-wrap items-center gap-3 text-sm sm:gap-6">
+            <a href="/" className="text-[#59645b] transition hover:text-[#314c39]">
+              Trang chủ
+            </a>
             <a href="/san-pham" className="text-[#59645b] transition hover:text-[#314c39]">
               Sản phẩm
             </a>
@@ -35,11 +35,10 @@ function GioiThieu() {
           </nav>
         </div>
       </header>
-
       <main>
         <section className="relative flex min-h-[340px] items-center justify-center overflow-hidden px-5 py-16 text-center sm:min-h-[380px]">
           <img
-            src="/images/banner-gioithieu.jpg"
+            src={`/images/${encodeURIComponent("Banner trang giới thiệu.jpg")}`}
             alt=""
             aria-hidden="true"
             className="absolute inset-0 h-full w-full object-cover object-center"
@@ -50,11 +49,12 @@ function GioiThieu() {
               GREEN GARDEN
             </h1>
             <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-white/95 sm:text-lg">
-              Ươm sắc xanh vào từng góc nhỏ, để mỗi ngày ở nhà đều thêm thư thái và gần gũi với thiên nhiên.
+              Ươm sắc xanh vào từng góc nhỏ, để mỗi ngày ở nhà đều thêm thư thái{" "}
+              <span className="whitespace-nowrap">và gần gũi với thiên nhiên.</span>
             </p>
           </div>
         </section>
-
+        {/* Hiển thị các thông tin về công ty, sứ mệnh và cam kết */}
         <section className="border-y border-[#e7e5dc] bg-[#f1f0e9]">
           <div className="mx-auto grid max-w-7xl gap-7 px-5 py-8 sm:px-8 md:grid-cols-3 md:gap-10">
             <div className="flex gap-4">
@@ -80,7 +80,7 @@ function GioiThieu() {
             </div>
           </div>
         </section>
-
+        {/* Hiển thị thông tin về cửa hàng, sản phẩm và hướng dẫn chăm sóc cây */}
         <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 sm:px-8 md:grid-cols-2 md:gap-16 md:py-24">
           <div className="relative">
             <img
@@ -99,7 +99,7 @@ function GioiThieu() {
             </h2>
             <p className="mt-6 leading-7 text-[#687168]">
               GREEN GARDEN là website chuyên cung cấp các loại cây cảnh trang trí, cây văn phòng, cây phong thủy và cây mini với mẫu mã đa dạng, giá cả hợp lý. 
-              Website được thiết kế với giao diện thân thiện, dễ sử dụng, giúp khách hàng thuận tiện tìm kiếm, lựa chọn và mua sắm những chậu cây yêu thích.
+               Website được thiết kế với giao diện thân thiện, dễ sử dụng, giúp khách hàng thuận tiện tìm kiếm, lựa chọn và mua sắm những chậu cây yêu thích.
                Bên cạnh đó, GREEN GARDEN còn cung cấp thông tin và hướng dẫn chăm sóc cây, giúp khách hàng dễ dàng tạo nên không gian sống xanh, tươi mát và gần gũi với thiên nhiên.
             </p>
             <p className="mt-4 leading-7 text-[#687168]">
@@ -114,7 +114,7 @@ function GioiThieu() {
             </a>
           </div>
         </section>
-
+        {/* Hiển thị thông tin về các nhóm sản phẩm và hướng dẫn chăm sóc cây */}
         <section className="bg-[#314c39] px-5 py-14 text-[#f8f7f2] sm:px-8 md:py-16">
           <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 md:flex-row md:items-center">
             <div>
@@ -130,7 +130,6 @@ function GioiThieu() {
           </div>
         </section>
       </main>
-
       <footer className="bg-[#24382b] px-5 py-10 text-[#e7e9e1] sm:px-8">
         <div className="mx-auto grid max-w-7xl gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
@@ -160,5 +159,5 @@ function GioiThieu() {
     </div>
   );
 }
-
+// Xuất component GioiThieu để sử dụng trong các phần khác của ứng dụng
 export default GioiThieu;

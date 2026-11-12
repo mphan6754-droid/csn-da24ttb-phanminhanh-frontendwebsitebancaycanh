@@ -29,6 +29,8 @@ export default function TheSanPham({ product }: { product: Product }) {
         <img
           src={image}
           alt={product.name}
+          //transition duration-500: giúp chuyển động ảnh mượt
+          //group-hover:scale-[1.03]: giúp phóng ảnh khi rê chuột
           className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.03]"
         />
         <span className="absolute left-4 top-4 rounded-full bg-[#f8f7f2]/90 px-3 py-1 text-[11px] font-medium tracking-wide text-[#526254]">
@@ -53,13 +55,16 @@ export default function TheSanPham({ product }: { product: Product }) {
         </p>
         <button
           type="button"
+          // Khi nhấn vào nút "Thêm vào giỏ hàng"
           onClick={() => {
+            // Gọi hàm addToCart từ context để thêm sản phẩm vào giỏ hàng
             addToCart({
               id: product.id,
               name: product.name,
               price: product.price,
               image,
             });
+            // Cập nhật trạng thái added để hiển thị thông báo đã thêm vào giỏ hàng
             setAdded(true);
           }}
           className="mt-auto w-full rounded-full bg-[#314c39] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#243c2c] focus:outline-none focus:ring-2 focus:ring-[#70836a] focus:ring-offset-2"
