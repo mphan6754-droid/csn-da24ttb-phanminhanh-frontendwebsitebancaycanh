@@ -16,7 +16,7 @@ export function CartMenu() {
     }).format(price);
 
   return (
-    <div className="relative">
+    <div className="relative flex items-center gap-2">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -29,6 +29,12 @@ export function CartMenu() {
           {itemCount}
         </span>
       </button>
+      <a
+        href="/don-hang"
+        className="whitespace-nowrap rounded-full border border-[#d7dbd0] bg-transparent px-4 py-2 text-sm font-medium text-[#314c39] transition hover:border-[#9ca994] hover:bg-[#edf0e8]"
+      >
+        Đơn hàng của tôi
+      </a>
 
       {isOpen && (
         <section
@@ -65,6 +71,11 @@ export function CartMenu() {
                       <p className="mt-1 text-sm text-[#526a51]">
                         {formatPrice(item.price)}
                       </p>
+                      {item.stock !== undefined && (
+                        <p className="mt-1 text-xs text-[#747a70]">
+                          Tồn kho: {item.stock} sản phẩm
+                        </p>
+                      )}
                       <div className="mt-2 flex items-center gap-2">
                         <button
                           type="button"
@@ -84,7 +95,8 @@ export function CartMenu() {
                           type="button"
                           onClick={() => changeQuantity(item.id, 1)}
                           aria-label={`Tăng số lượng ${item.name}`}
-                          className="flex h-7 w-7 items-center justify-center rounded-full border border-[#d7dbd0] hover:bg-[#edf0e8]"
+                          disabled={item.stock !== undefined && item.quantity >= item.stock}
+                          className="flex h-7 w-7 items-center justify-center rounded-full border border-[#d7dbd0] hover:bg-[#edf0e8] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           +
                         </button>

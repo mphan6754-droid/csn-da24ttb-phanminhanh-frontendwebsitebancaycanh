@@ -11,7 +11,7 @@ const formatPrice = (price: number) =>
 // Component ChiTietSanPham hiển thị chi tiết sản phẩm dựa trên productId
 export default function ChiTietSanPham({ productId }: { productId: number }) {
   const product = products.find((item) => item.id === productId);
-  const { addToCart } = useCart();
+  const { addToCart, items } = useCart();
 // Nếu không tìm thấy sản phẩm, hiển thị thông báo lỗi và liên kết quay lại danh sách sản phẩm
   if (!product) {
     return (
@@ -24,6 +24,8 @@ export default function ChiTietSanPham({ productId }: { productId: number }) {
 // Nếu tìm thấy sản phẩm, hiển thị chi tiết sản phẩm bao gồm hình ảnh, tên, giá, mô tả và thông tin chăm sóc hoặc sử dụng
   const image = getProductImage(product.id);
   const isPlant = product.group !== "Dụng cụ chăm sóc";
+  const cartQuantity = items.find((item) => item.id === product.id)?.quantity ?? 0;
+  const isOutOfStock = cartQuantity >= product.stock;
 // Trả về JSX để hiển thị chi tiết sản phẩm
   return (
     <div className="min-h-screen bg-[#f8f7f2] text-[#27352c]">
@@ -58,6 +60,7 @@ export default function ChiTietSanPham({ productId }: { productId: number }) {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#78836f]">{product.group}</p>
             <h1 className="mt-3 font-serif text-4xl leading-tight text-[#263b2d] sm:text-5xl">{product.name}</h1>
             <p className="mt-5 text-2xl font-semibold text-[#314c39]">{formatPrice(product.price)}</p>
+            <p className="mt-2 text-sm text-[#747a70]">Tồn kho: {product.stock} sản phẩm</p>
             <p className="mt-5 max-w-prose leading-7 text-[#687168]">
               {product.description}
             </p>
@@ -65,10 +68,11 @@ export default function ChiTietSanPham({ productId }: { productId: number }) {
        {/* Nút thêm vào giỏ hàng */}
             <button
               type="button"
-              onClick={() => addToCart({ id: product.id, name: product.name, price: product.price, image })}
-              className="mt-7 w-full rounded-full bg-[#314c39] px-5 py-3 font-semibold text-white transition hover:bg-[#243c2c] sm:w-auto sm:min-w-56"
+              onClick={() => addToCart({ id: product.id, name: product.name, price: product.price, image, stock: product.stock })}
+              disabled={isOutOfStock}
+              className="mt-7 w-full rounded-full bg-[#314c39] px-5 py-3 font-semibold text-white transition hover:bg-[#243c2c] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:min-w-56"
             >
-              Thêm vào giỏ hàng
+              {isOutOfStock ? "Đã hết hàng" : "Thêm vào giỏ hàng"}
             </button>
             <p className="mt-3 text-sm text-[#747a70]">Sản phẩm sẽ được thêm vào giỏ hàng của bạn.</p>
             <div className="mt-9 rounded-2xl bg-[#f0f1e9] p-5 sm:p-6">

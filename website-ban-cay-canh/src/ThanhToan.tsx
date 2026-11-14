@@ -2,7 +2,12 @@ import { useState, type SubmitEvent } from "react";
 import AccountMenu from "./Dangnhap/Dangky";
 import { useCart } from "./CartContext";
 import { CartMenu } from "./GioHang";
-import { saveOrder, type Order } from "./DlieuDonhangStorage";
+import {
+  isValidShippingAddress,
+  isValidVietnameseMobilePhone,
+  saveOrder,
+  type Order,
+} from "./DlieuDonhangStorage";
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("vi-VN", {
@@ -14,6 +19,12 @@ export default function ThanhToan() {
   const { items, clearCart } = useCart();
   const [savedOrder, setSavedOrder] = useState<Order | null>(null);
   const [submitError, setSubmitError] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [address, setAddress] = useState("");
+  const [addressError, setAddressError] = useState("");
   // Tính toán tổng tiền, phí vận chuyển và tổng cộng
   const subtotal = items.reduce(
     (total, item) => total + item.price * item.quantity,
@@ -26,15 +37,61 @@ export default function ThanhToan() {
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (items.length === 0) return;
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const nameInput = form.elements.namedItem("name");
+    const emailInput = form.elements.namedItem("email");
+    const phoneInput = form.elements.namedItem("phone");
+    const addressInput = form.elements.namedItem("address");
+    const formData = new FormData(form);
+    const nameValue = String(formData.get("name") ?? "").trim();
+    const phoneValue = String(formData.get("phone") ?? "").trim();
+    const addressValue = String(formData.get("address") ?? "").trim();
+    const nameValid = nameValue.length > 0;
+    const phoneValid = isValidVietnameseMobilePhone(phoneValue);
+    const addressValid = isValidShippingAddress(addressValue);
+    const emailValid =
+      emailInput instanceof HTMLInputElement && emailInput.validity.valid;
+    const emailMessage =
+      emailInput instanceof HTMLInputElement && emailInput.validity.valueMissing
+        ? "Vui lòng nhập địa chỉ email."
+        : "Email chưa đúng định dạng. Ví dụ: ten@domain.com.";
+    const nameMessage = "Vui lòng nhập họ và tên.";
+    const phoneMessage =
+      "Nhập số di động Việt Nam gồm đúng 10 chữ số với đầu số hợp lệ.";
+    const addressMessage =
+      "Nhập địa chỉ rõ hơn (ít nhất 10 ký tự và gồm từ 2 phần).";
+
+    if (nameInput instanceof HTMLInputElement) {
+      nameInput.setCustomValidity(nameValid ? "" : nameMessage);
+    }
+    if (phoneInput instanceof HTMLInputElement) {
+      phoneInput.setCustomValidity(phoneValid ? "" : phoneMessage);
+    }
+    if (emailInput instanceof HTMLInputElement) {
+      emailInput.setCustomValidity(emailValid ? "" : emailMessage);
+    }
+    if (addressInput instanceof HTMLTextAreaElement) {
+      addressInput.setCustomValidity(addressValid ? "" : addressMessage);
+    }
+    setNameError(nameValid ? "" : nameMessage);
+    setEmailError(emailValid ? "" : emailMessage);
+    setPhoneError(phoneValid ? "" : phoneMessage);
+    setAddressError(addressValid ? "" : addressMessage);
+    if (!nameValid || !emailValid || !phoneValid || !addressValid) {
+      form.reportValidity();
+      return;
+    }
+
+    if (!form.reportValidity()) return;
     const order: Order = {
       code: `GG${Date.now().toString().slice(-8)}${Math.floor(Math.random() * 90 + 10)}`,
       createdAt: new Date().toISOString(),
       status: "pending",
       recipient: {
-        name: String(formData.get("name") ?? "").trim(),
-        phone: String(formData.get("phone") ?? "").trim(),
-        address: String(formData.get("address") ?? "").trim(),
+        name: nameValue,
+        email: String(formData.get("email") ?? "").trim(),
+        phone: phoneValue,
+        address: addressValue.replace(/\s+/g, " "),
       },
       items: items.map(({ id, name, price, quantity }) => ({
         id,
@@ -69,7 +126,6 @@ export default function ThanhToan() {
             <a href="/" className="text-[#59645b] hover:text-[#314c39]">Trang chủ</a>
             <a href="/san-pham" className="text-[#59645b] hover:text-[#314c39]">Sản phẩm</a>
             <a href="/gioi-thieu" className="text-[#59645b] hover:text-[#314c39]">Về chúng tôi</a>
-            <a href="/don-hang" className="text-[#59645b] hover:text-[#314c39]">Đơn hàng của tôi</a>
             <a href="/lien-he" className="text-[#59645b] hover:text-[#314c39]">Liên hệ</a>
             <CartMenu />
             <AccountMenu />
@@ -90,6 +146,7 @@ export default function ThanhToan() {
               <div>
                 <h2 className="font-semibold text-[#314c39]">Người nhận</h2>
                 <p className="mt-2 text-sm leading-6 text-[#59645b]">{savedOrder.recipient.name}</p>
+                {savedOrder.recipient.email && <p className="text-sm leading-6 text-[#59645b]">{savedOrder.recipient.email}</p>}
                 <p className="text-sm leading-6 text-[#59645b]">{savedOrder.recipient.phone}</p>
                 <p className="text-sm leading-6 text-[#59645b]">{savedOrder.recipient.address}</p>
               </div>
@@ -126,19 +183,90 @@ export default function ThanhToan() {
               Đây là quy trình đặt hàng mô phỏng.
             </p>
             <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
-              <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-[#e2e0d7] bg-white p-6 sm:p-8">
+              <form noValidate onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-[#e2e0d7] bg-white p-6 sm:p-8">
                 <h2 className="font-serif text-2xl text-[#314c39]">Thông tin nhận hàng</h2>
                 <div>
                   <label htmlFor="checkout-name" className="mb-1 block text-sm font-medium">Họ và tên</label>
-                  <input id="checkout-name" name="name" autoComplete="name" required className="w-full rounded-xl border border-[#deded4] px-3 py-3 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]" />
+                  <input
+                    id="checkout-name"
+                    name="name"
+                    autoComplete="name"
+                    onChange={(event) => {
+                      setNameError("");
+                      event.currentTarget.setCustomValidity("");
+                    }}
+                    aria-invalid={Boolean(nameError)}
+                    aria-describedby={nameError ? "checkout-name-error" : undefined}
+                    required
+                    className="w-full rounded-xl border border-[#deded4] px-3 py-3 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
+                  />
+                  {nameError && <p id="checkout-name-error" role="alert" className="mt-1 text-sm text-red-700">{nameError}</p>}
+                </div>
+                <div>
+                  <label htmlFor="checkout-email" className="mb-1 block text-sm font-medium">Email</label>
+                  <input
+                    id="checkout-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    onChange={(event) => {
+                      setEmailError("");
+                      event.currentTarget.setCustomValidity("");
+                    }}
+                    aria-invalid={Boolean(emailError)}
+                    aria-describedby={emailError ? "checkout-email-error" : undefined}
+                    required
+                    className="w-full rounded-xl border border-[#deded4] px-3 py-3 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
+                  />
+                  {emailError && <p id="checkout-email-error" role="alert" className="mt-1 text-sm text-red-700">{emailError}</p>}
                 </div>
                 <div>
                   <label htmlFor="checkout-phone" className="mb-1 block text-sm font-medium">Số điện thoại</label>
-                  <input id="checkout-phone" name="phone" type="tel" autoComplete="tel" pattern="[0-9+().\\s-]{9,15}" required className="w-full rounded-xl border border-[#deded4] px-3 py-3 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]" />
+                  <input
+                    id="checkout-phone"
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel-national"
+                    inputMode="numeric"
+                    pattern="0(?:3[2-9]|5[25689]|7[06789]|8[1-9]|9[0-46-9])[0-9]{7}"
+                    maxLength={10}
+                    placeholder="0912345678"
+                    title="Nhập số di động Việt Nam gồm đúng 10 chữ số, bắt đầu bằng 03, 05, 07, 08 hoặc 09."
+                    value={phone}
+                    onChange={(event) => {
+                      setPhone(event.currentTarget.value.replace(/[^0-9]/g, "").slice(0, 10));
+                      setPhoneError("");
+                      event.currentTarget.setCustomValidity("");
+                    }}
+                    aria-invalid={Boolean(phoneError)}
+                    aria-describedby={phoneError ? "checkout-phone-error" : undefined}
+                    required
+                    className="w-full rounded-xl border border-[#deded4] px-3 py-3 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
+                  />
+                  {phoneError && <p id="checkout-phone-error" role="alert" className="mt-1 text-sm text-red-700">{phoneError}</p>}
+                  <p className="mt-1 text-xs text-[#747a70]">Nhập 10 chữ số, bắt đầu bằng 03, 05, 07, 08 hoặc 09.</p>
                 </div>
                 <div>
                   <label htmlFor="checkout-address" className="mb-1 block text-sm font-medium">Địa chỉ nhận hàng</label>
-                  <textarea id="checkout-address" name="address" autoComplete="street-address" rows={3} required className="w-full rounded-xl border border-[#deded4] px-3 py-3 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]" />
+                  <textarea
+                    id="checkout-address"
+                    name="address"
+                    autoComplete="street-address"
+                    rows={3}
+                    minLength={10}
+                    value={address}
+                    onChange={(event) => {
+                      setAddress(event.currentTarget.value);
+                      setAddressError("");
+                      event.currentTarget.setCustomValidity("");
+                    }}
+                    aria-invalid={Boolean(addressError)}
+                    aria-describedby={addressError ? "checkout-address-error" : undefined}
+                    required
+                    className="w-full rounded-xl border border-[#deded4] px-3 py-3 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
+                  />
+                  {addressError && <p id="checkout-address-error" role="alert" className="mt-1 text-sm text-red-700">{addressError}</p>}
+                  <p className="mt-1 text-xs text-[#747a70]">Nhập địa chỉ cụ thể, tối thiểu 10 ký tự (ví dụ: số nhà, đường/ấp, phường/xã).</p>
                 </div>
                 {/* Hiển thị các phương thức thanh toán mô phỏng */}
                 <fieldset>

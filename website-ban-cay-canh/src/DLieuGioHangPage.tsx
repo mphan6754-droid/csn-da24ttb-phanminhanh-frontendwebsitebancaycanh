@@ -59,10 +59,11 @@ export default function GioHangPage() {
                   <div className="min-w-0 flex-1">
                     <a href={`/san-pham/${item.id}`} className="font-serif text-xl text-[#263b2d] hover:underline">{item.name}</a>
                     <p className="mt-1 text-sm text-[#526a51]">{formatPrice(item.price)}</p>
+                    {item.stock !== undefined && <p className="mt-1 text-xs text-[#747a70]">Tồn kho: {item.stock} sản phẩm</p>}
                     <div className="mt-3 flex items-center gap-3">
                       <button type="button" onClick={() => changeQuantity(item.id, -1)} aria-label={`Giảm số lượng ${item.name}`} className="h-8 w-8 rounded-full border border-[#d7dbd0] hover:bg-[#edf0e8]">-</button>
                       <span className="min-w-5 text-center" aria-label={`Số lượng ${item.quantity}`}>{item.quantity}</span>
-                      <button type="button" onClick={() => changeQuantity(item.id, 1)} aria-label={`Tăng số lượng ${item.name}`} className="h-8 w-8 rounded-full border border-[#d7dbd0] hover:bg-[#edf0e8]">+</button>
+                      <button type="button" onClick={() => changeQuantity(item.id, 1)} aria-label={`Tăng số lượng ${item.name}`} disabled={item.stock !== undefined && item.quantity >= item.stock} className="h-8 w-8 rounded-full border border-[#d7dbd0] hover:bg-[#edf0e8] disabled:cursor-not-allowed disabled:opacity-50">+</button>
                       <button type="button" onClick={() => removeFromCart(item.id)} className="ml-auto text-sm text-[#9a564b] hover:text-[#723b33]">Xóa</button>
                     </div>
                   </div>

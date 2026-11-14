@@ -5,6 +5,7 @@ export type CartProduct = {
   name: string;
   price: number;
   image?: string;
+  stock?: number;
 };
 //một sản phẩm trong giỏ hàng gồm thông tin cơ bản và số lượng
 type CartItem = CartProduct & {

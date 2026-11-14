@@ -48,11 +48,25 @@ export function QuanLyGioHang({ children }: { children: ReactNode }) {
     // Cập nhật giỏ hàng: nếu sản phẩm đã có trong giỏ, tăng số lượng; nếu chưa, thêm sản phẩm mới với số lượng 1
     setItems((currentItems) => {
       const existingItem = currentItems.find((item) => item.id === product.id);
+      if (
+        product.stock !== undefined &&
+        (product.stock <= 0 || (existingItem?.quantity ?? 0) >= product.stock)
+      ) {
+        return currentItems;
+      }
+
       // Nếu sản phẩm đã có trong giỏ, tăng số lượng
       if (existingItem) {
         return currentItems.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? {
+                ...item,
+                ...product,
+                quantity: Math.min(
+                  item.quantity + 1,
+                  product.stock ?? item.stock ?? Number.MAX_SAFE_INTEGER
+                ),
+              }
             : item
         );
       }
@@ -66,7 +80,13 @@ export function QuanLyGioHang({ children }: { children: ReactNode }) {
       currentItems
         .map((item) =>
           item.id === productId
-            ? { ...item, quantity: item.quantity + amount }
+            ? {
+                ...item,
+                quantity:
+                  item.stock === undefined
+                    ? item.quantity + amount
+                    : Math.min(item.stock, item.quantity + amount),
+              }
             : item
         )
         .filter((item) => item.quantity > 0)

@@ -76,7 +76,6 @@ export default function DonHang() {
             <a href="/" className="text-[#59645b] hover:text-[#314c39]">Trang chủ</a>
             <a href="/san-pham" className="text-[#59645b] hover:text-[#314c39]">Sản phẩm</a>
             <a href="/gioi-thieu" className="text-[#59645b] hover:text-[#314c39]">Về chúng tôi</a>
-            <a href="/don-hang" aria-current="page" className="font-semibold text-[#314c39]">Đơn hàng của tôi</a>
             <CartMenu />
           </nav>
         </div>
@@ -133,6 +132,7 @@ export default function DonHang() {
                   <div>
                     <h3 className="text-sm font-semibold text-[#314c39]">Người nhận</h3>
                     <p className="mt-2 text-sm leading-6 text-[#59645b]">{order.recipient.name}</p>
+                    {order.recipient.email && <p className="text-sm leading-6 text-[#59645b]">{order.recipient.email}</p>}
                     <p className="text-sm leading-6 text-[#59645b]">{order.recipient.phone}</p>
                     <p className="text-sm leading-6 text-[#59645b]">{order.recipient.address}</p>
                   </div>

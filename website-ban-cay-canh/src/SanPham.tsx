@@ -8,6 +8,7 @@ export type Product = {
   id: number;
   name: string;
   price: number;
+  stock: number;
   category: string;
   group: string;
   origin?: string;
@@ -19,9 +20,7 @@ export type Product = {
   placement?: string;
 };
 
-// Shared catalog data is exported alongside this page component intentionally.
-// eslint-disable-next-line react-refresh/only-export-components
-export const products: Product[] = [
+const productCatalog = [
   {
     id: 1,
     name: "Cây Sen Đá",
@@ -505,6 +504,56 @@ export const products: Product[] = [
   },
 ];
 
+const productStock: Record<number, number> = {
+  1: 24,
+  2: 18,
+  3: 12,
+  4: 15,
+  5: 20,
+  6: 14,
+  7: 11,
+  8: 13,
+  9: 16,
+  10: 8,
+  11: 10,
+  12: 25,
+  13: 9,
+  14: 7,
+  15: 8,
+  16: 12,
+  17: 30,
+  18: 22,
+  19: 18,
+  20: 12,
+  21: 16,
+  22: 20,
+  23: 18,
+  24: 14,
+  25: 20,
+  26: 9,
+  27: 11,
+  28: 10,
+  29: 7,
+  30: 12,
+  31: 9,
+  32: 8,
+  33: 6,
+  34: 7,
+  35: 8,
+  36: 10,
+  37: 25,
+  38: 20,
+  39: 35,
+  40: 18,
+};
+
+// Shared catalog data is exported alongside this page component intentionally.
+// eslint-disable-next-line react-refresh/only-export-components
+export const products: Product[] = productCatalog.map((product) => ({
+  ...product,
+  stock: productStock[product.id],
+}));
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const productGroups = [
   "Cây mini",
@@ -632,10 +681,6 @@ export default function SanPham() {
 
             <a href="/gioi-thieu" className="text-[#59645b] transition hover:text-[#314c39]">
               Về chúng tôi
-            </a>
-
-            <a href="/don-hang" className="text-[#59645b] transition hover:text-[#314c39]">
-              Đơn hàng
             </a>
 
             <a href="/lien-he" className="text-[#59645b] transition hover:text-[#314c39]">

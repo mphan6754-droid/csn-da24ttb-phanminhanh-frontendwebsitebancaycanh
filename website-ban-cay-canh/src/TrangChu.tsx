@@ -44,7 +44,6 @@ export default function TrangChu() {
             <a href="/" aria-current="page" className="font-semibold text-[#314c39]">Trang chủ</a>
             <a href="/san-pham" className="text-[#59645b] hover:text-[#314c39]">Sản phẩm</a>
             <a href="/gioi-thieu" className="text-[#59645b] hover:text-[#314c39]">Về chúng tôi</a>
-            <a href="/don-hang" className="text-[#59645b] hover:text-[#314c39]">Đơn hàng của tôi</a>
             <a href="/lien-he" className="text-[#59645b] hover:text-[#314c39]">Liên hệ</a>
             <CartMenu />
             <AccountMenu />
@@ -109,7 +108,7 @@ export default function TrangChu() {
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#78836f]">Được yêu thích</p>
                 <h2 className="mt-3 font-serif text-3xl text-[#263b2d] sm:text-4xl">Sản phẩm được yêu thích nhất</h2>
-                <p className="mt-2 text-sm text-[#747a70]">Nhấn trái tim để lưu sản phẩm yêu thích. Lượt bán được tính từ đơn hàng trên trình duyệt này.</p>
+                <p className="mt-2 text-sm text-[#747a70]">Nhấn trái tim để thêm nhanh sản phẩm yêu thích vào giỏ hàng.</p>
               </div>
               <a href="/san-pham" className="text-sm font-semibold text-[#526a51] hover:underline">Khám phá cửa hàng →</a>
             </div>

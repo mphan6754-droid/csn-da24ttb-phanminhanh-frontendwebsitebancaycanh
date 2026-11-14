@@ -5,6 +5,7 @@ export type Order = {
   status: "pending" | "cancelled";
   recipient: {
     name: string;
+    email?: string;
     phone: string;
     address: string;
   };
@@ -21,6 +22,22 @@ export type Order = {
 };
 // Khóa lưu trữ đơn hàng trong localStorage
 const STORAGE_KEY = "green-garden-orders";
+const vietnameseMobilePhonePattern =
+  /^0(?:3[2-9]|5[25689]|7[06789]|8[1-9]|9[0-46-9])[0-9]{7}$/;
+
+export function isValidVietnameseMobilePhone(phone: string) {
+  return vietnameseMobilePhonePattern.test(phone);
+}
+
+export function isValidShippingAddress(address: string) {
+  const normalizedAddress = address.trim().replace(/\s+/g, " ");
+  return (
+    normalizedAddress.length >= 10 &&
+    normalizedAddress.split(" ").length >= 2 &&
+    /[A-Za-zÀ-ỹ]/.test(normalizedAddress)
+  );
+}
+
 // Kiểm tra xem một giá trị có phải là đơn hàng hợp lệ hay không
 function isOrder(value: unknown): value is Order {
   if (typeof value !== "object" || value === null) return false;
@@ -32,6 +49,8 @@ function isOrder(value: unknown): value is Order {
       order.status === "pending" ||
       order.status === "cancelled") &&
     typeof order.recipient?.name === "string" &&
+    (order.recipient.email === undefined ||
+      typeof order.recipient.email === "string") &&
     typeof order.recipient.phone === "string" &&
     typeof order.recipient.address === "string" &&
     Array.isArray(order.items) &&
@@ -67,6 +86,12 @@ export function loadProductSales(): Record<number, number> {
 }
 // Lưu đơn hàng mới vào localStorage, thêm vào đầu danh sách đơn hàng
 export function saveOrder(order: Order) {
+  if (!isValidVietnameseMobilePhone(order.recipient.phone)) {
+    throw new Error("Số điện thoại nhận hàng không hợp lệ.");
+  }
+  if (!isValidShippingAddress(order.recipient.address)) {
+    throw new Error("Địa chỉ nhận hàng chưa đầy đủ.");
+  }
   const orders = loadOrders();
   localStorage.setItem(STORAGE_KEY, JSON.stringify([order, ...orders]));
 }
