@@ -35,10 +35,10 @@ header.sticky {
 
 header.sticky nav a[aria-current="page"] {
   border-radius: 9999px;
-  background: #314c39;
+  background: #47764f;
   padding: 8px 14px;
   color: #fffefa;
-  box-shadow: 0 3px 10px rgb(49 76 57 / 18%);
+  box-shadow: 0 3px 10px rgb(71 118 79 / 18%);
 }
 
 header.sticky nav a:not([aria-current="page"]):hover {
@@ -54,6 +54,27 @@ header.sticky nav > div > button {
 header.sticky nav > div > button:hover {
   background: #e8efe5;
   border-color: #9eaf99;
+}
+
+[class*="bg-[#24382b]"] {
+  background-color: #3b6245;
+}
+
+[class*="bg-[#314c39]"] {
+  background-color: #47764f;
+}
+
+[class*="hover:bg-[#243c2c]"]:hover {
+  background-color: #3a6242;
+}
+
+[class*="bg-[#f1f0e9]"] {
+  background-color: #f3f6ec;
+}
+
+footer [class*="text-[#b8c2b6]"],
+footer [class*="text-[#aeb9ac]"] {
+  color: #dce7d8;
 }
 
 button,

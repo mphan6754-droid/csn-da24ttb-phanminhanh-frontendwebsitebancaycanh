@@ -1,3 +1,4 @@
+import { Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "./CartContext";
 import { getProductImage, type Product } from "./SanPham";
@@ -8,7 +9,17 @@ const formatPrice = (price: number) =>
     currency: "VND",
   }).format(price);
 
-export default function TheSanPham({ product }: { product: Product }) {
+export default function TheSanPham({
+  product,
+  isFavorite = false,
+  salesCount,
+  isBestSeller = false,
+}: {
+  product: Product;
+  isFavorite?: boolean;
+  salesCount?: number;
+  isBestSeller?: boolean;
+}) {
   const { addToCart } = useCart();
   const [added, setAdded] = useState(false);
   const image = getProductImage(product.id);
@@ -21,22 +32,38 @@ export default function TheSanPham({ product }: { product: Product }) {
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#e7e5dc] bg-white">
-      <a
-        href={`/san-pham/${product.id}`}
-        className="group relative block overflow-hidden bg-[#e7e9df]"
-        aria-label={`Xem chi tiết ${product.name}`}
-      >
-        <img
-          src={image}
-          alt={product.name}
-          //transition duration-500: giúp chuyển động ảnh mượt
-          //group-hover:scale-[1.03]: giúp phóng ảnh khi rê chuột
-          className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-        />
-        <span className="absolute left-4 top-4 rounded-full bg-[#f8f7f2]/90 px-3 py-1 text-[11px] font-medium tracking-wide text-[#526254]">
-          {product.group}
-        </span>
-      </a>
+      <div className="relative overflow-hidden bg-[#e7e9df]">
+        <a
+          href={`/san-pham/${product.id}`}
+          className="group relative block overflow-hidden"
+          aria-label={`Xem chi tiết ${product.name}`}
+        >
+          <img
+            src={image}
+            alt={product.name}
+            //transition duration-500: giúp chuyển động ảnh mượt
+            //group-hover:scale-[1.03]: giúp phóng ảnh khi rê chuột
+            className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+          />
+          <span className="absolute left-4 top-4 rounded-full bg-[#f8f7f2]/90 px-3 py-1 text-[11px] font-medium tracking-wide text-[#526254]">
+            {product.group}
+          </span>
+          {isBestSeller && (
+            <span className="absolute left-4 top-12 rounded-full bg-[#314c39]/90 px-3 py-1 text-[11px] font-semibold tracking-wide text-white">
+              Bán chạy
+            </span>
+          )}
+        </a>
+        {isFavorite && (
+          <span
+            aria-label="Sản phẩm được yêu thích"
+            title="Sản phẩm được yêu thích"
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-[#fff1ef] text-[#c24e42] shadow-sm"
+          >
+            <Heart size={20} fill="currentColor" aria-hidden="true" />
+          </span>
+        )}
+      </div>
 
       <div className="flex flex-1 flex-col p-4">
         <h2 className="font-serif text-xl text-[#263b2d]">
@@ -50,9 +77,14 @@ export default function TheSanPham({ product }: { product: Product }) {
         {product.origin && (
           <p className="mt-2 text-xs text-[#85887e]">Xuất xứ: Việt Nam {product.origin}</p>
         )}
-        <p className="mt-4 font-semibold text-[#314c39]">
-          {formatPrice(product.price)}
-        </p>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <p className="font-semibold text-[#314c39]">
+            {formatPrice(product.price)}
+          </p>
+          {salesCount !== undefined && (
+            <p className="text-xs text-[#85887e]">{salesCount} lượt bán</p>
+          )}
+        </div>
         <button
           type="button"
           // Khi nhấn vào nút "Thêm vào giỏ hàng"

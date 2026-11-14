@@ -54,6 +54,17 @@ export function loadOrders(): Order[] {
     status: order.status ?? "pending",
   }));
 }
+// Count quantities from active simulated orders stored in this browser.
+export function loadProductSales(): Record<number, number> {
+  return loadOrders()
+    .filter((order) => order.status !== "cancelled")
+    .reduce<Record<number, number>>((sales, order) => {
+      for (const item of order.items) {
+        sales[item.id] = (sales[item.id] ?? 0) + item.quantity;
+      }
+      return sales;
+    }, {});
+}
 // Lưu đơn hàng mới vào localStorage, thêm vào đầu danh sách đơn hàng
 export function saveOrder(order: Order) {
   const orders = loadOrders();

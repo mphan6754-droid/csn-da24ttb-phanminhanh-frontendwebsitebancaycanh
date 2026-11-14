@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import AccountMenu from "./Dangnhap/Dangky";
 import { CartMenu } from "./GioHang";
 import TheSanPham from "./TheSanPham";
+import { loadProductSales } from "./DlieuDonhangStorage";
 
 export type Product = {
   id: number;
@@ -18,6 +19,8 @@ export type Product = {
   placement?: string;
 };
 
+// Shared catalog data is exported alongside this page component intentionally.
+// eslint-disable-next-line react-refresh/only-export-components
 export const products: Product[] = [
   {
     id: 1,
@@ -272,14 +275,247 @@ export const products: Product[] = [
     care: "Giũ sạch đất, phơi khô sau khi dùng và cất nơi thoáng.",
     size: "Kích cỡ theo sản phẩm trong ảnh.",
   },
+  {
+    id: 22,
+    name: "Cây Sen Đá Móng Rồng",
+    price: 55000,
+    category: "Sen đá",
+    group: "Cây mini",
+    description: "Sen đá có lá vân sọc nổi bật, thích hợp trang trí bàn học hoặc kệ sách.",
+    light: "Ưa nơi sáng thoáng, có thể nhận nắng nhẹ buổi sáng.",
+    watering: "Tưới khi đất khô hoàn toàn, tránh để nước đọng trong lá.",
+    care: "Dùng đất thoát nước tốt và đặt chậu ở nơi thông thoáng.",
+    size: "Chậu mini, cao khoảng 8–15 cm.",
+  },
+  {
+    id: 23,
+    name: "Sen Đá Chuỗi Ngọc",
+    price: 60000,
+    category: "Sen đá",
+    group: "Cây mini",
+    description: "Dáng cây nhỏ gọn, có thể đặt trên bàn hoặc trồng trong chậu treo mini.",
+    light: "Đặt ở nơi sáng, tránh nắng gắt kéo dài.",
+    watering: "Tưới ít khi đất đã khô; giảm lượng nước vào ngày mưa.",
+    care: "Dùng giá thể thoát nước và tỉa bỏ lá khô.",
+    size: "Chậu mini, thân cây có thể rủ nhẹ.",
+  },
+  {
+    id: 24,
+    name: "Xương Rồng Tai Thỏ",
+    price: 50000,
+    category: "Xương rồng",
+    group: "Cây mini",
+    description: "Xương rồng dáng độc đáo, phù hợp làm điểm nhấn cho góc bàn nhiều ánh sáng.",
+    light: "Ưa sáng tự nhiên và có thể nhận nắng nhẹ.",
+    watering: "Chỉ tưới khi đất khô, tránh tưới lên thân cây.",
+    care: "Đặt nơi thông thoáng và sử dụng đất trồng xương rồng.",
+    size: "Chậu mini, cao khoảng 10–18 cm.",
+  },
+  {
+    id: 25,
+    name: "Sen Đá Nâu",
+    price: 45000,
+    category: "Sen đá",
+    group: "Cây mini",
+    description: "Cây sen đá nhỏ với sắc lá trầm, dễ phối cùng các chậu cây mini khác.",
+    light: "Ưa nơi sáng thoáng, tránh thay đổi ánh sáng đột ngột.",
+    watering: "Tưới khi đất khô hoàn toàn.",
+    care: "Đảm bảo chậu có lỗ thoát nước và không để đọng nước ở đĩa lót.",
+    size: "Chậu mini, đường kính khoảng 6–10 cm.",
+  },
+  {
+    id: 26,
+    name: "Cây Cẩm Nhung",
+    price: 65000,
+    category: "Cẩm Nhung",
+    group: "Cây mini",
+    description: "Tán lá nhỏ có đường gân nổi bật, phù hợp trang trí bàn học và góc làm việc.",
+    light: "Đặt ở nơi có ánh sáng gián tiếp, tránh nắng chiếu trực tiếp.",
+    watering: "Giữ đất ẩm nhẹ, không để chậu bị úng.",
+    care: "Đặt nơi thoáng mát và kiểm tra độ ẩm đất thường xuyên.",
+    size: "Chậu để bàn, cao khoảng 10–15 cm.",
+  },
+  {
+    id: 27,
+    name: "Cây Lan Ý",
+    price: 130000,
+    category: "Lan Ý",
+    group: "Cây văn phòng",
+    description: "Cây lá xanh bóng, dáng gọn, phù hợp đặt ở bàn làm việc hoặc phòng khách.",
+    light: "Phát triển tốt ở nơi có ánh sáng gián tiếp.",
+    watering: "Tưới khi lớp đất mặt bắt đầu khô.",
+    care: "Lau lá định kỳ và tránh để nước đọng lâu trong chậu.",
+    size: "Cây trồng chậu, cao khoảng 25–45 cm.",
+  },
+  {
+    id: 28,
+    name: "Cây Vạn Niên Thanh",
+    price: 110000,
+    category: "Vạn Niên Thanh",
+    group: "Cây văn phòng",
+    description: "Tán lá xanh điểm màu sáng, giúp không gian làm việc thêm sinh động.",
+    light: "Ưa ánh sáng tán xạ, chịu bóng nhẹ.",
+    watering: "Tưới khi đất se khô, điều chỉnh theo độ ẩm trong phòng.",
+    care: "Đặt cây nơi thông thoáng và lau lá khi bám bụi.",
+    size: "Cây để bàn hoặc kệ, kích thước tùy chậu.",
+  },
+  {
+    id: 29,
+    name: "Cây Bàng Singapore Mini",
+    price: 160000,
+    category: "Bàng Singapore",
+    group: "Cây văn phòng",
+    description: "Dáng cây đứng với lá lớn tạo điểm nhấn gọn gàng cho góc phòng.",
+    light: "Đặt ở nơi sáng, ưu tiên ánh sáng tự nhiên gián tiếp.",
+    watering: "Tưới khi lớp đất mặt khô nhẹ.",
+    care: "Xoay chậu định kỳ để cây nhận sáng đều và tránh gió điều hòa trực tiếp.",
+    size: "Cây mini trồng chậu, cao khoảng 25–40 cm.",
+  },
+  {
+    id: 30,
+    name: "Cây Dương Xỉ Mini",
+    price: 75000,
+    category: "Dương Xỉ",
+    group: "Cây văn phòng",
+    description: "Tán lá xanh mềm, thích hợp đặt trên kệ hoặc bàn ở nơi mát.",
+    light: "Ưa ánh sáng gián tiếp và môi trường thoáng mát.",
+    watering: "Giữ đất ẩm vừa phải, tránh để khô kéo dài.",
+    care: "Có thể phun sương nhẹ khi không khí khô; tránh nắng gắt.",
+    size: "Chậu để bàn, tán rộng khoảng 15–25 cm.",
+  },
+  {
+    id: 31,
+    name: "Cây Trầu Bà Thanh Xuân",
+    price: 145000,
+    category: "Trầu Bà",
+    group: "Cây văn phòng",
+    description: "Lá xẻ tạo dáng bắt mắt, phù hợp làm cây trang trí trong nhà.",
+    light: "Đặt nơi sáng gián tiếp, tránh nắng gắt.",
+    watering: "Tưới khi đất bắt đầu khô nhẹ.",
+    care: "Lau lá và cắt bỏ lá già để cây giữ dáng gọn.",
+    size: "Cây trồng chậu, kích thước tùy cây.",
+  },
+  {
+    id: 32,
+    name: "Cây Ngũ Gia Bì",
+    price: 125000,
+    category: "Ngũ Gia Bì",
+    group: "Cây phong thủy",
+    description: "Cây có tán lá xanh gọn, thường được chọn để trang trí bàn hoặc phòng khách.",
+    light: "Ưa nơi sáng thoáng, có thể chịu bóng nhẹ.",
+    watering: "Tưới khi đất se khô, tránh để rễ ngập nước.",
+    care: "Tỉa lá khô và đặt cây nơi thông thoáng.",
+    size: "Cây trồng chậu, cao khoảng 20–40 cm.",
+  },
+  {
+    id: 33,
+    name: "Cây Kim Ngân Thắt Bím",
+    price: 190000,
+    category: "Kim Ngân",
+    group: "Cây phong thủy",
+    description: "Thân cây được tạo dáng bím, phù hợp trang trí bàn làm việc hoặc quầy tiếp khách.",
+    light: "Đặt ở nơi sáng gián tiếp, tránh nắng trưa.",
+    watering: "Tưới vừa đủ khi đất bắt đầu khô.",
+    care: "Đảm bảo chậu thoát nước tốt và lau lá định kỳ.",
+    size: "Cây chậu để bàn, cao khoảng 25–40 cm.",
+  },
+  {
+    id: 34,
+    name: "Cây Thiết Mộc Lan",
+    price: 175000,
+    category: "Thiết Mộc Lan",
+    group: "Cây phong thủy",
+    description: "Lá dài viền sáng, thích hợp tạo điểm nhấn xanh cho không gian sống.",
+    light: "Phát triển tốt ở nơi sáng, tránh nắng gắt trực tiếp.",
+    watering: "Tưới khi đất khô nhẹ, không để nước đọng.",
+    care: "Lau lá và đặt cây tránh luồng gió điều hòa mạnh.",
+    size: "Cây trồng chậu, kích thước tùy cây.",
+  },
+  {
+    id: 35,
+    name: "Cây Phát Tài Núi",
+    price: 220000,
+    category: "Phát Tài",
+    group: "Cây phong thủy",
+    description: "Dáng cây khỏe khoắn, phù hợp trang trí góc phòng hoặc sảnh nhỏ.",
+    light: "Ưa ánh sáng tự nhiên gián tiếp.",
+    watering: "Tưới khi đất bắt đầu khô, tránh để chậu sũng nước.",
+    care: "Đặt nơi thông thoáng và lau lá khi cần.",
+    size: "Cây trồng chậu, cao khoảng 30–50 cm.",
+  },
+  {
+    id: 36,
+    name: "Cây Vạn Lộc",
+    price: 95000,
+    category: "Vạn Lộc",
+    group: "Cây phong thủy",
+    description: "Lá có sắc xanh pha hồng, tạo điểm nhấn màu sắc cho bàn làm việc.",
+    light: "Đặt nơi có ánh sáng tán xạ, tránh nắng gắt.",
+    watering: "Tưới khi bề mặt đất bắt đầu khô.",
+    care: "Giữ đất thoát nước tốt và loại bỏ lá úa.",
+    size: "Chậu để bàn, cao khoảng 15–25 cm.",
+  },
+  {
+    id: 37,
+    name: "Chậu Gốm Đất Nung Mini",
+    price: 35000,
+    category: "Chậu cây",
+    group: "Dụng cụ chăm sóc",
+    description: "Chậu gốm nhỏ gọn, phù hợp trồng sen đá hoặc cây mini.",
+    light: "Dùng làm chậu trồng cây trong nhà hoặc ban công.",
+    watering: "Tưới cây theo nhu cầu của từng loại cây trồng.",
+    care: "Rửa sạch đất bám và để chậu khô trước khi cất.",
+    size: "Kích thước mini, phù hợp cây để bàn.",
+  },
+  {
+    id: 38,
+    name: "Chậu Men Mini",
+    price: 45000,
+    category: "Chậu cây",
+    group: "Dụng cụ chăm sóc",
+    description: "Chậu men nhỏ dùng trang trí bàn học, bàn làm việc hoặc kệ sách.",
+    light: "Phù hợp làm chậu trồng cây mini trong nhà.",
+    watering: "Chọn lượng nước phù hợp với cây và khả năng thoát nước của chậu.",
+    care: "Lau sạch bề mặt chậu bằng khăn mềm.",
+    size: "Chậu mini, dùng cho cây để bàn.",
+  },
+  {
+    id: 39,
+    name: "Đất Trồng Sen Đá",
+    price: 30000,
+    category: "Đất trồng",
+    group: "Dụng cụ chăm sóc",
+    description: "Giá thể trồng sen đá, hỗ trợ thoát nước cho cây trồng trong chậu.",
+    light: "Dùng làm giá thể trồng hoặc thay đất cho sen đá.",
+    watering: "Tưới theo nhu cầu của cây sau khi trồng.",
+    care: "Bảo quản kín, để nơi khô ráo và làm theo hướng dẫn trên bao bì.",
+    size: "Đóng gói theo sản phẩm.",
+  },
+  {
+    id: 40,
+    name: "Set 10 Chậu Mini Trồng Sen Đá",
+    price: 65000,
+    category: "Chậu cây",
+    group: "Dụng cụ chăm sóc",
+    description: "Bộ chậu mini tiện dụng để trồng và sắp xếp nhiều cây nhỏ.",
+    light: "Phù hợp trồng sen đá và cây mini.",
+    watering: "Điều chỉnh lượng nước theo từng loại cây.",
+    care: "Rửa sạch chậu sau khi sử dụng và để khô trước khi cất.",
+    size: "Bộ gồm 10 chậu mini.",
+  },
 ];
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const productGroups = [
   "Cây mini",
   "Cây văn phòng",
   "Cây phong thủy",
   "Dụng cụ chăm sóc",
 ];
+
+// Curated favorites shown on the homepage and catalog.
+// eslint-disable-next-line react-refresh/only-export-components
+export const favoriteProductIds = [1, 6, 9, 11];
 
 const productImage = (fileName: string) =>
   `/images/${encodeURIComponent(fileName)}`;
@@ -306,8 +542,29 @@ const productImages: Record<number, string> = {
   19: productImage("bình tưới nước vòi dài.webp"),
   20: productImage("Bộ dụng cụ làm vườn 3 món.webp"),
   21: productImage("găng tay làm vườn.webp"),
+  22: productImage("cấy sen đá móng rồng.jpg"),
+  23: productImage("Cây sen đá chuỗi ngọc.jpg"),
+  24: productImage("xương rồng tai thỏ.jpg"),
+  25: productImage("sen đá nâu.jpg"),
+  26: productImage("cây cẩm nhug.jpg"),
+  27: productImage("cây lan ý.jpg"),
+  28: productImage("cây vạn niên.jpg"),
+  29: productImage("cây bàng singapore.jpg"),
+  30: productImage("cây đui công.webp"),
+  31: productImage("trầu bà thah xuân.jpg"),
+  32: productImage("Cây Ngũ Gia Bì.jpg"),
+  33: productImage("Cây Kim Ngân Thắt Bím.jpg"),
+  34: productImage("Cây Thiết Mộc Lan.jpg"),
+  35: productImage("Cây Phát Tài Núi.jpg"),
+  36: productImage("Cây Vạn Lộc.jpg"),
+  37: productImage("chậu gốm đất nung bát tràng mini.webp"),
+  38: productImage("chậu men xôi mini.webp"),
+  39: productImage("Đất trông sen đá.jpg"),
+  40: productImage("set 10 chậu mini trồng sen đá.webp"),
+  41: productImage("bình tưới 15ml.webp"),
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const getProductImage = (productId: number) => productImages[productId];
 
 export default function SanPham() {
@@ -316,6 +573,28 @@ export default function SanPham() {
     const requestedGroup = new URLSearchParams(window.location.search).get("group");
     return productGroups.find((group) => group === requestedGroup) ?? "all";
   });
+  const [salesState] = useState(() => {
+    try {
+      return { counts: loadProductSales(), error: "" };
+    } catch (error) {
+      console.error("Không thể thống kê lượt bán sản phẩm:", error);
+      return {
+        counts: {} as Record<number, number>,
+        error: "Không thể tải lượt bán từ lịch sử đơn hàng.",
+      };
+    }
+  });
+  const bestSellerIds = useMemo(
+    () =>
+      new Set(
+        Object.entries(salesState.counts)
+          .filter(([, count]) => count > 0)
+          .sort(([, countA], [, countB]) => countB - countA)
+          .slice(0, 4)
+          .map(([id]) => Number(id))
+      ),
+    [salesState.counts]
+  );
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -422,12 +701,25 @@ export default function SanPham() {
         <p aria-live="polite" className="mb-4 text-xs uppercase tracking-[0.12em] text-[#85887e]">
           Tìm thấy {filteredProducts.length} sản phẩm
         </p>
+        {salesState.error && (
+          <p role="alert" className="mb-4 text-sm text-red-700">{salesState.error}</p>
+        )}
 
         {/* Danh sách sản phẩm */}
         {filteredProducts.length > 0 ? (
           <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filteredProducts.map((product) => (
-              <TheSanPham key={product.id} product={product} />
+              <TheSanPham
+                key={product.id}
+                product={product}
+                isFavorite={favoriteProductIds.includes(product.id)}
+                salesCount={
+                  salesState.error
+                    ? undefined
+                    : salesState.counts[product.id] ?? 0
+                }
+                isBestSeller={bestSellerIds.has(product.id)}
+              />
             ))}
           </div>
         ) : (

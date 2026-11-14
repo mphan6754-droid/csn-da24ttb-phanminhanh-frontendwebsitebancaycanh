@@ -18,6 +18,15 @@ npm run lint
 npm run build
 ```
 
+## Đưa website lên Vercel
+
+1. Đẩy repository lên GitHub rồi tạo project mới trong Vercel và import repository đó.
+2. Chọn **Root Directory** là `website-ban-cay-canh`.
+3. Dùng cấu hình Vite mặc định: lệnh build `npm run build`, thư mục output `dist`.
+4. Đặt tên project là `greengardenshop` nếu tên còn khả dụng. Sau khi deploy, Vercel sẽ cấp URL dạng `https://greengardenshop.vercel.app`.
+
+`vercel.json` cấu hình fallback cho các đường dẫn nội bộ của ứng dụng React khi tải trực tiếp hoặc refresh trang.
+
 ## Các file cấu hình và khởi động
 
 | File | Nội dung |
@@ -26,6 +35,7 @@ npm run build
 | `package.json` | Thông tin dự án, thư viện và các lệnh `dev`, `build`, `lint`. |
 | `package-lock.json` | Khóa phiên bản thư viện đã cài để các máy cài đặt nhất quán. |
 | `vite.config.ts` | Cấu hình Vite và các plugin dùng khi chạy/build dự án. |
+| `vercel.json` | Cấu hình đường dẫn fallback của ứng dụng khi deploy lên Vercel. |
 | `eslint.config.js` | Quy tắc kiểm tra chất lượng mã nguồn. |
 | `tsconfig.json` | Cấu hình TypeScript gốc, kết nối các cấu hình con. |
 | `tsconfig.app.json` | Cấu hình TypeScript cho ứng dụng React. |
@@ -39,9 +49,8 @@ npm run build
 | `main.tsx` | Điểm khởi chạy React và nạp CSS toàn cục. |
 | `App.tsx` | Chọn trang hiển thị theo đường dẫn URL và bọc ứng dụng với quản lý giỏ hàng. |
 | `index.css` | CSS toàn cục, Tailwind CSS và một số quy tắc giao diện chung. |
-| `App.css` | File CSS riêng của ứng dụng; kiểm tra tham chiếu trước khi xóa nếu không sử dụng. |
 | `TrangChu.tsx` | Trang chủ, banner, nhóm sản phẩm và sản phẩm nổi bật. |
-| `SanPham.tsx` | Danh sách sản phẩm, dữ liệu sản phẩm, nhóm và ảnh sản phẩm. |
+| `SanPham.tsx` | Danh sách 41 sản phẩm thuộc 4 nhóm, dữ liệu và ảnh sản phẩm. |
 | `TheSanPham.tsx` | Thẻ sản phẩm và nút thêm sản phẩm vào giỏ hàng. |
 | `ChiTietSanPham.tsx` | Trang thông tin chi tiết của một sản phẩm. |
 | `CartContext.tsx` | Khai báo kiểu dữ liệu và các thao tác giỏ hàng dùng chung giữa các trang. |
@@ -54,9 +63,6 @@ npm run build
 | `GioiThieu.tsx` | Trang giới thiệu cửa hàng. |
 | `Lienhe.tsx` | Trang thông tin và biểu mẫu liên hệ. |
 | `Dangnhap/Dangky.tsx` | Menu đăng nhập/đăng ký mô phỏng, lưu trạng thái trong phiên trình duyệt. |
-| `assets/hero.png` | Ảnh nằm trong mã nguồn nếu được component tham chiếu. |
-| `assets/react.svg`, `assets/vite.svg` | Ảnh mẫu React/Vite; có thể bỏ khi đã xác nhận không còn tham chiếu. |
-
 ## Tài nguyên tĩnh
 
 - `public/images/`: ảnh logo, banner, cây cảnh, chậu và dụng cụ chăm sóc. Các file trong thư mục này được tham chiếu bằng đường dẫn `/images/...`.

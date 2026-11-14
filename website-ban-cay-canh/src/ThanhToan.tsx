@@ -76,7 +76,6 @@ export default function ThanhToan() {
           </nav>
         </div>
       </header>
-// Hiển thị nội dung chính của trang thanh toán
       <main className="mx-auto max-w-5xl px-5 py-12 sm:px-8 md:py-16">
         {savedOrder ? (
           <section className="mx-auto max-w-2xl rounded-2xl border border-[#dce4d8] bg-white p-8 sm:p-10">
@@ -126,7 +125,6 @@ export default function ThanhToan() {
             <p className="mt-3 text-sm leading-6 text-[#747a70]">
               Đây là quy trình đặt hàng mô phỏng.
             </p>
-// Hiển thị biểu mẫu thông tin nhận hàng và tóm tắt đơn hàng
             <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
               <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-[#e2e0d7] bg-white p-6 sm:p-8">
                 <h2 className="font-serif text-2xl text-[#314c39]">Thông tin nhận hàng</h2>
@@ -151,7 +149,7 @@ export default function ThanhToan() {
                   </label>
                   <label className="mt-2 flex items-center gap-3 rounded-xl border border-[#deded4] p-3 text-sm">
                     <input type="radio" name="payment" value="transfer" />
-                    Chuyển khoảng
+                    Chuyển khoản
                   </label>
                 </fieldset>
                 {submitError && <p role="alert" className="text-sm text-red-700">{submitError}</p>}

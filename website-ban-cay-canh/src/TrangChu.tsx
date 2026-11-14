@@ -1,7 +1,9 @@
+import { useState } from "react";
 import AccountMenu from "./Dangnhap/Dangky";
 import { CartMenu } from "./GioHang";
 import TheSanPham from "./TheSanPham";  
-import { productGroups, products } from "./SanPham";
+import { favoriteProductIds, productGroups, products } from "./SanPham";
+import { loadProductSales } from "./DlieuDonhangStorage";
 
 const featuredProducts = products.filter((product) =>
   [1, 6, 9, 11].includes(product.id)
@@ -15,6 +17,18 @@ const groupDescriptions: Record<string, string> = {
 };
 // Component TrangChu hiển thị trang chủ của website bán cây cảnh
 export default function TrangChu() {
+  const [salesState] = useState(() => {
+    try {
+      return { counts: loadProductSales(), error: "" };
+    } catch (error) {
+      console.error("Không thể thống kê lượt bán sản phẩm:", error);
+      return {
+        counts: {} as Record<number, number>,
+        error: "Không thể tải lượt bán từ lịch sử đơn hàng.",
+      };
+    }
+  });
+
   return (
     <div className="min-h-screen bg-[#f8f7f2] text-[#27352c]">
       <header className="sticky top-0 z-40 border-b border-[#e7e5dc] bg-[#f8f7f2]/95 backdrop-blur">
@@ -45,7 +59,8 @@ export default function TrangChu() {
             aria-hidden="true"
             className="absolute inset-0 -z-20 h-full w-full object-cover"
           />
-          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#193a27]/85 via-[#193a27]/60 to-[#193a27]/15" />
+
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#315d3d]/75 via-[#315d3d]/45 to-[#315d3d]/10" />
           <div className="mx-auto w-full max-w-7xl text-white">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/80">GREEN GARDEN · VĨNH LONG</p>
             <h1 className="mt-5 max-w-[16ch] font-serif text-4xl leading-tight sm:max-w-none sm:text-6xl">
@@ -93,13 +108,26 @@ export default function TrangChu() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#78836f]">Được yêu thích</p>
-                <h2 className="mt-3 font-serif text-3xl text-[#263b2d] sm:text-4xl">Cây nổi bật</h2>
+                <h2 className="mt-3 font-serif text-3xl text-[#263b2d] sm:text-4xl">Sản phẩm được yêu thích nhất</h2>
+                <p className="mt-2 text-sm text-[#747a70]">Nhấn trái tim để lưu sản phẩm yêu thích. Lượt bán được tính từ đơn hàng trên trình duyệt này.</p>
               </div>
               <a href="/san-pham" className="text-sm font-semibold text-[#526a51] hover:underline">Khám phá cửa hàng →</a>
             </div>
+            {salesState.error && (
+              <p role="alert" className="mt-4 text-sm text-red-700">{salesState.error}</p>
+            )}
             <div className="mt-7 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {featuredProducts.map((product) => (
-                <TheSanPham key={product.id} product={product} />
+                <TheSanPham
+                  key={product.id}
+                  product={product}
+                  isFavorite={favoriteProductIds.includes(product.id)}
+                  salesCount={
+                    salesState.error
+                      ? undefined
+                      : salesState.counts[product.id] ?? 0
+                  }
+                />
               ))}
             </div>
           </div>
@@ -132,10 +160,31 @@ export default function TrangChu() {
           </div>
         </section>
       </main>
-      <footer className="bg-[#24382b] px-5 py-8 text-center text-sm text-[#b8c2b6] sm:px-8">
-        <p className="font-serif text-lg text-[#e7e9e1]">GREEN GARDEN</p>
-        <p className="mt-2">Cây xanh cho nhà mình · Vĩnh Long, Việt Nam</p>
-        <p className="mt-4 text-xs">Website còn trong giai đoạn phát triển.</p>
+      <footer className="bg-[#24382b] px-5 py-10 text-[#e7e9e1] sm:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <h2 className="font-serif text-xl">GREEN GARDEN</h2>
+            <p className="mt-3 text-sm leading-6 text-[#b8c2b6]">Cây xanh cho nhà mình.</p>
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#b8c2b6]">Người thực hiện</h3>
+            <p className="mt-3 text-sm leading-6">Phan Minh Anh · DA24TTB</p>
+            <p className="text-sm text-[#b8c2b6]">MSSV: 110124003</p>
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#b8c2b6]">Liên hệ</h3>
+            <a href="tel:0888898646" className="mt-3 block text-sm hover:text-white">0888898646</a>
+            <a href="mailto:anhphan6754@gmail.com" className="mt-1 block break-all text-sm hover:text-white">anhphan6754@gmail.com</a>
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[#b8c2b6]">Ghé thăm</h3>
+            <p className="mt-3 text-sm leading-6">Vĩnh Long, Việt Nam</p>
+            <a href="/lien-he" className="mt-1 inline-block text-sm text-[#d3dec9] hover:text-white">Chỉ đường và thông tin →</a>
+          </div>
+        </div>
+        <p className="mx-auto mt-8 max-w-7xl border-t border-white/10 pt-5 text-xs text-[#aeb9ac]">
+          © {new Date().getFullYear()} GREEN GARDEN
+        </p>
       </footer>
     </div>
   );
