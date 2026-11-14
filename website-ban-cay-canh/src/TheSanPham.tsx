@@ -97,7 +97,7 @@ export default function TheSanPham({
           <p className="font-semibold text-[#314c39]">
             {formatPrice(product.price)}
           </p>
-          {salesCount !== undefined && (
+          {salesCount !== undefined && salesCount > 0 && (
             <p className="text-xs text-[#85887e]">{salesCount} lượt bán</p>
           )}
         </div>
