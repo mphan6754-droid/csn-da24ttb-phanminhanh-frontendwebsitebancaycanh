@@ -26,6 +26,14 @@ export default function ChiTietSanPham({ productId }: { productId: number }) {
   const isPlant = product.group !== "Dụng cụ chăm sóc";
   const cartQuantity = items.find((item) => item.id === product.id)?.quantity ?? 0;
   const isOutOfStock = cartQuantity >= product.stock;
+  const addProductToCart = () =>
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image,
+      stock: product.stock,
+    });
 // Trả về JSX để hiển thị chi tiết sản phẩm
   return (
     <div className="min-h-screen bg-[#f8f7f2] text-[#27352c]">
@@ -66,15 +74,36 @@ export default function ChiTietSanPham({ productId }: { productId: number }) {
             </p>
             {product.origin && <p className="mt-3 text-sm text-[#747a70]">Xuất xứ: {product.origin}</p>}
        {/* Nút thêm vào giỏ hàng */}
-            <button
-              type="button"
-              onClick={() => addToCart({ id: product.id, name: product.name, price: product.price, image, stock: product.stock })}
-              disabled={isOutOfStock}
-              className="mt-7 w-full rounded-full bg-[#314c39] px-5 py-3 font-semibold text-white transition hover:bg-[#243c2c] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:min-w-56"
-            >
-              {isOutOfStock ? "Đã hết hàng" : "Thêm vào giỏ hàng"}
-            </button>
-            <p className="mt-3 text-sm text-[#747a70]">Sản phẩm sẽ được thêm vào giỏ hàng của bạn.</p>
+            <div className="mt-7 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={addProductToCart}
+                disabled={isOutOfStock}
+                className="rounded-full bg-[#314c39] px-3 py-3 text-xs font-semibold text-white transition hover:bg-[#243c2c] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+              >
+                {isOutOfStock ? "Đã hết hàng" : "Thêm giỏ hàng"}
+              </button>
+              {isOutOfStock ? (
+                <button
+                  type="button"
+                  disabled
+                  className="rounded-full border border-[#d7dbd0] px-3 py-3 text-xs font-semibold text-[#747a70] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+                >
+                  Đã hết hàng
+                </button>
+              ) : (
+                <a
+                  href="/thanh-toan"
+                  onClick={addProductToCart}
+                  className="flex items-center justify-center rounded-full bg-[#9a602f] px-3 py-3 text-center text-xs font-semibold text-white transition hover:bg-[#804d27] focus:outline-none focus:ring-2 focus:ring-[#70836a] focus:ring-offset-2 sm:text-sm"
+                >
+                  Thanh toán ngay
+                </a>
+              )}
+            </div>
+            <p className="mt-3 text-sm text-[#747a70]">
+              Chọn “Thêm giỏ hàng” để mua sau hoặc “Thanh toán ngay” để chuyển thẳng đến thanh toán.
+            </p>
             <div className="mt-9 rounded-2xl bg-[#f0f1e9] p-5 sm:p-6">
               <h2 className="font-serif text-2xl text-[#314c39]">{isPlant ? "Thông tin chăm sóc" : "Thông tin sử dụng"}</h2>
               <div className="mt-4 space-y-2 text-sm leading-6 text-[#59645b]">

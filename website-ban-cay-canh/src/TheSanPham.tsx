@@ -25,6 +25,16 @@ export default function TheSanPham({
   const image = getProductImage(product.id);
   const cartQuantity = items.find((item) => item.id === product.id)?.quantity ?? 0;
   const isOutOfStock = cartQuantity >= product.stock;
+  const addProductToCart = () => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image,
+      stock: product.stock,
+    });
+    setAdded(true);
+  };
 
   useEffect(() => {
     if (!added) return;
@@ -58,16 +68,7 @@ export default function TheSanPham({
         </a>
         <button
           type="button"
-          onClick={() => {
-            addToCart({
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              image,
-              stock: product.stock,
-            });
-            setAdded(true);
-          }}
+          onClick={addProductToCart}
           disabled={isOutOfStock}
           aria-label={`Thêm nhanh ${product.name} vào giỏ hàng`}
           title={isOutOfStock ? "Đã hết số lượng có thể thêm" : "Thêm nhanh vào giỏ hàng"}
@@ -102,26 +103,33 @@ export default function TheSanPham({
           )}
         </div>
         <p className="mt-2 text-sm text-[#747a70]">Tồn kho: {product.stock} sản phẩm</p>
-        <button
-          type="button"
-          // Khi nhấn vào nút "Thêm vào giỏ hàng"
-          onClick={() => {
-            // Gọi hàm addToCart từ context để thêm sản phẩm vào giỏ hàng
-            addToCart({
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              image,
-              stock: product.stock,
-            });
-            // Cập nhật trạng thái added để hiển thị thông báo đã thêm vào giỏ hàng
-            setAdded(true);
-          }}
-          disabled={isOutOfStock}
-          className="mt-auto w-full rounded-full bg-[#314c39] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#243c2c] focus:outline-none focus:ring-2 focus:ring-[#70836a] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isOutOfStock ? "Đã hết hàng" : added ? "Đã thêm vào giỏ hàng" : "Thêm vào giỏ hàng"}
-        </button>
+        <div className="mt-auto grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={addProductToCart}
+            disabled={isOutOfStock}
+            className="w-full rounded-full bg-[#314c39] px-2 py-3 text-xs font-semibold text-white transition hover:bg-[#243c2c] focus:outline-none focus:ring-2 focus:ring-[#70836a] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+          >
+            {isOutOfStock ? "Đã hết hàng" : added ? "Đã thêm vào giỏ" : "Thêm giỏ hàng"}
+          </button>
+          {isOutOfStock ? (
+            <button
+              type="button"
+              disabled
+              className="w-full rounded-full border border-[#d7dbd0] px-2 py-3 text-xs font-semibold text-[#747a70] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+            >
+              Đã hết hàng
+            </button>
+          ) : (
+            <a
+              href="/thanh-toan"
+              onClick={addProductToCart}
+              className="flex w-full items-center justify-center rounded-full bg-[#9a602f] px-2 py-3 text-center text-xs font-semibold text-white transition hover:bg-[#804d27] focus:outline-none focus:ring-2 focus:ring-[#70836a] focus:ring-offset-2 sm:text-sm"
+            >
+              Thanh toán ngay
+            </a>
+          )}
+        </div>
         <p aria-live="polite" className="sr-only">
           {added ? `${product.name} đã được thêm vào giỏ hàng.` : ""}
         </p>
