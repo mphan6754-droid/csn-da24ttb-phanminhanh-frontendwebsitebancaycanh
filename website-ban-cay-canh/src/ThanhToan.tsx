@@ -5,6 +5,7 @@ import { CartMenu } from "./GioHang";
 import {
   isValidShippingAddress,
   isValidVietnameseMobilePhone,
+  isOrder,
   saveOrder,
   type Order,
 } from "./DlieuDonhangStorage";
@@ -19,6 +20,8 @@ export default function ThanhToan() {
   const { items, clearCart } = useCart();
   const [savedOrder, setSavedOrder] = useState<Order | null>(null);
   const [submitError, setSubmitError] = useState("");
+  const [historyWarning, setHistoryWarning] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [phone, setPhone] = useState("");
@@ -34,7 +37,7 @@ export default function ThanhToan() {
   const shipping = subtotal >= 500000 || subtotal === 0 ? 0 : 20000;
   const total = subtotal + shipping;
 
-  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (items.length === 0) return;
     const form = event.currentTarget;
@@ -103,14 +106,51 @@ export default function ThanhToan() {
       shipping,
       total,
     };
-// Lưu đơn hàng vào localStorage và cập nhật trạng thái savedOrder, đồng thời xóa giỏ hàng
+    setSubmitError("");
+    setIsSubmitting(true);
     try {
-      saveOrder(order);
-      setSavedOrder(order);
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(order),
+      });
+      const result: unknown = await response.json();
+      if (!response.ok) {
+        const errorMessage =
+          typeof result === "object" &&
+          result !== null &&
+          "error" in result &&
+          typeof result.error === "string"
+            ? result.error
+            : "Không thể gửi đơn hàng lên máy chủ.";
+        throw new Error(errorMessage);
+      }
+      if (!isOrder(result)) {
+        throw new Error("Máy chủ trả về đơn hàng không hợp lệ.");
+      }
+
+      try {
+        saveOrder(result);
+      } catch (error) {
+        console.error(
+          "Đơn đã lưu máy chủ nhưng không lưu được lịch sử cục bộ:",
+          error
+        );
+        setHistoryWarning(
+          "Đơn đã được gửi, nhưng lịch sử đơn hàng trên trình duyệt này không lưu được."
+        );
+      }
+      setSavedOrder(result);
       clearCart();
     } catch (error) {
-      console.error("Không thể lưu đơn hàng mô phỏng:", error);
-      setSubmitError("Không thể lưu đơn hàng trên trình duyệt. Vui lòng thử lại.");
+      console.error("Không thể gửi đơn hàng lên máy chủ:", error);
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Không thể gửi đơn hàng. Vui lòng thử lại."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 // Trả về JSX để hiển thị trang thanh toán
@@ -140,7 +180,7 @@ export default function ThanhToan() {
             <div className="mt-3 leading-7 text-[#687168]">
               Mã đơn hàng: <strong>{savedOrder.code}</strong>.
               <br />
-              Website đang trong quá trình phát triển.
+              Đơn hàng đã được lưu thành công. Cửa hàng sẽ sớm xác nhận với bạn.
             </div>
             <div className="mt-6 grid gap-6 border-y border-[#e7e5dc] py-6 sm:grid-cols-2">
               <div>
@@ -166,6 +206,11 @@ export default function ThanhToan() {
               <span>Tổng cộng</span><span className="text-[#314c39]">{formatPrice(savedOrder.total)}</span>
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
+              {historyWarning && (
+                <p role="status" className="w-full text-sm text-amber-800">
+                  {historyWarning}
+                </p>
+              )}
               <a href="/don-hang" className="inline-flex rounded-full bg-[#314c39] px-6 py-3 text-sm font-semibold text-white hover:bg-[#243c2c]">Xem đơn hàng của tôi</a>
               <a href="/san-pham" className="inline-flex rounded-full border border-[#d7dbd0] px-6 py-3 text-sm font-semibold text-[#314c39] hover:bg-[#edf0e8]">Tiếp tục mua sắm</a>
             </div>
@@ -180,7 +225,7 @@ export default function ThanhToan() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#78836f]">GREEN GARDEN</p>
             <h1 className="mt-3 font-serif text-4xl text-[#263b2d]">Thông tin thanh toán</h1>
             <p className="mt-3 text-sm leading-6 text-[#747a70]">
-              Đây là quy trình đặt hàng mô phỏng.
+              Đơn hàng sẽ được lưu vào hệ thống. Thanh toán trực tuyến chưa được kết nối.
             </p>
             <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
               <form noValidate onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-[#e2e0d7] bg-white p-6 sm:p-8">
@@ -281,7 +326,7 @@ export default function ThanhToan() {
                   </label>
                 </fieldset>
                 {submitError && <p role="alert" className="text-sm text-red-700">{submitError}</p>}
-                <button type="submit" className="w-full rounded-full bg-[#314c39] px-5 py-3 font-semibold text-white transition hover:bg-[#243c2c]">Xác nhận đặt hàng</button>
+                <button type="submit" disabled={isSubmitting} className="w-full rounded-full bg-[#314c39] px-5 py-3 font-semibold text-white transition hover:bg-[#243c2c] disabled:cursor-not-allowed disabled:opacity-60">{isSubmitting ? "Đang gửi đơn..." : "Xác nhận đặt hàng"}</button>
               </form>
               {/* Hiển thị tóm tắt đơn hàng, bao gồm danh sách sản phẩm, tạm tính, phí giao hàng và tổng cộng */}
               <aside className="h-fit rounded-2xl border border-[#e2e0d7] bg-white p-6">

@@ -18,6 +18,42 @@ npm run lint
 npm run build
 ```
 
+## Bảng quản trị
+
+1. Tạo project Supabase. Trong **SQL Editor**, chạy lệnh tạo bảng bên dưới.
+2. Trên Vercel, vào **Project → Settings → Environment Variables** và thêm:
+   - `ADMIN_USERNAME`: `admin@greengarden`
+   - `ADMIN_PASSWORD`: mật khẩu admin bạn chọn.
+   - `ADMIN_SESSION_SECRET`: chuỗi ngẫu nhiên riêng, dài tối thiểu 32 ký tự.
+   - `SUPABASE_URL`: Project URL trong Supabase.
+   - `SUPABASE_SERVICE_ROLE_KEY`: khóa `service_role` của Supabase.
+3. Chọn môi trường **Production** (và **Preview** nếu cần), lưu biến rồi deploy lại. Không ghi mật khẩu, session secret hoặc service-role key vào mã nguồn; không thêm tiền tố `VITE_`.
+4. Mở website đã deploy, vào menu **Tài khoản** và đăng nhập với username/mật khẩu admin. Website tự chuyển tới `/admin`.
+5. Đơn mới đặt từ cửa hàng được ghi vào Supabase. Trong admin, lọc **Chờ xác nhận**, **Đang giao**, **Khách đã nhận** hoặc trạng thái khác; đổi trạng thái bằng danh sách trên từng đơn. Nút **Tải lại đơn hàng** đồng bộ lại dữ liệu từ database.
+
+Chạy lệnh SQL sau trong **Supabase → SQL Editor** để tạo bảng (RLS bật, không tạo policy công khai; server dùng service-role key):
+
+```sql
+create table public.orders (
+  code text primary key,
+  created_at timestamptz not null,
+  status text not null check (status in ('pending', 'confirmed', 'shipping', 'completed', 'cancelled')),
+  recipient jsonb not null,
+  items jsonb not null,
+  subtotal bigint not null check (subtotal >= 0),
+  shipping bigint not null check (shipping >= 0),
+  total bigint not null check (total = subtotal + shipping)
+);
+
+alter table public.orders enable row level security;
+```
+
+Đăng xuất bằng nút **Đăng xuất admin**. Phiên admin dùng cookie `HttpOnly` và hết hạn sau 8 giờ. Admin đọc đơn tập trung từ Supabase; trang lịch sử **Đơn hàng của tôi** vẫn có dữ liệu cục bộ theo trình duyệt.
+
+Các đơn cũ đã được tạo trước khi cấu hình Supabase vẫn ở localStorage và không tự chuyển sang database; chỉ đơn mới sau khi cấu hình mới xuất hiện trong admin.
+
+Các Vercel Functions tại `api/` chỉ hoạt động trên bản deploy Vercel; `npm run dev` chỉ chạy giao diện Vite và không chạy các function này.
+
 ## Đưa website lên Vercel
 
 1. Đẩy repository lên GitHub rồi tạo project mới trong Vercel và import repository đó.
@@ -57,12 +93,20 @@ npm run build
 | `QuanLyGioHang.tsx` | Cung cấp trạng thái giỏ hàng, cập nhật số lượng và lưu giỏ vào trình duyệt. |
 | `GioHang.tsx` | Menu giỏ hàng nhanh trên thanh điều hướng. |
 | `DLieuGioHangPage.tsx` | Trang giỏ hàng đầy đủ, tính tạm tính và phí giao hàng. |
-| `ThanhToan.tsx` | Biểu mẫu thanh toán mô phỏng và xác nhận đơn hàng. |
-| `DlieuDonhangStorage.ts` | Kiểu dữ liệu đơn hàng và thao tác lưu/đọc/hủy/xóa đơn trong trình duyệt. |
+| `ThanhToan.tsx` | Biểu mẫu thanh toán mô phỏng và gửi đơn mới lên API để lưu tập trung. |
+| `DlieuDonhangStorage.ts` | Kiểu dữ liệu đơn hàng, kiểm tra dữ liệu và lưu lịch sử cục bộ cho khách. |
 | `DonHang.tsx` | Trang lịch sử và quản lý các đơn hàng mô phỏng. |
+| `Admin.tsx` | Bảng quản trị: thống kê, lọc và cập nhật trạng thái đơn hàng trong Supabase. |
 | `GioiThieu.tsx` | Trang giới thiệu cửa hàng. |
 | `Lienhe.tsx` | Trang thông tin và biểu mẫu liên hệ. |
-| `Dangnhap/Dangky.tsx` | Menu đăng nhập/đăng ký mô phỏng, lưu trạng thái trong phiên trình duyệt. |
+| `Dangnhap/Dangky.tsx` | Menu tài khoản; admin được xác thực qua Vercel Function, tài khoản khách vẫn mô phỏng. |
+
+## Vercel Functions
+
+| File | Nội dung |
+| --- | --- |
+| `api/admin.ts` | Kiểm tra thông tin đăng nhập bằng Environment Variables và tạo/hủy phiên admin bằng cookie `HttpOnly`. |
+| `api/orders.ts` | Nhận đơn từ checkout và cung cấp danh sách/cập nhật trạng thái cho admin qua Supabase. |
 ## Tài nguyên tĩnh
 
 - `public/images/`: ảnh logo, banner, cây cảnh, chậu và dụng cụ chăm sóc. Các file trong thư mục này được tham chiếu bằng đường dẫn `/images/...`.

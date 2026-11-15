@@ -1,8 +1,15 @@
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "shipping"
+  | "completed"
+  | "cancelled";
+
 export type Order = {
   // Mã đơn hàng
   code: string;
   createdAt: string;
-  status: "pending" | "cancelled";
+  status: OrderStatus;
   recipient: {
     name: string;
     email?: string;
@@ -39,7 +46,7 @@ export function isValidShippingAddress(address: string) {
 }
 
 // Kiểm tra xem một giá trị có phải là đơn hàng hợp lệ hay không
-function isOrder(value: unknown): value is Order {
+export function isOrder(value: unknown): value is Order {
   if (typeof value !== "object" || value === null) return false;
   const order = value as Partial<Order>;
   return (
@@ -47,6 +54,9 @@ function isOrder(value: unknown): value is Order {
     typeof order.createdAt === "string" &&
     (order.status === undefined ||
       order.status === "pending" ||
+      order.status === "confirmed" ||
+      order.status === "shipping" ||
+      order.status === "completed" ||
       order.status === "cancelled") &&
     typeof order.recipient?.name === "string" &&
     (order.recipient.email === undefined ||
@@ -105,12 +115,19 @@ export function deleteOrder(orderCode: string) {
 }
 // Hủy đơn hàng theo mã đơn hàng, thay đổi trạng thái thành "cancelled"
 export function cancelOrder(orderCode: string) {
+  updateOrderStatus(orderCode, "cancelled");
+}
+
+export function updateOrderStatus(orderCode: string, status: OrderStatus) {
   const orders = loadOrders();
+  if (!orders.some((order) => order.code === orderCode)) {
+    throw new Error(`Không tìm thấy đơn hàng ${orderCode}.`);
+  }
   localStorage.setItem(
     STORAGE_KEY,
     JSON.stringify(
       orders.map((order) =>
-        order.code === orderCode ? { ...order, status: "cancelled" } : order
+        order.code === orderCode ? { ...order, status } : order
       )
     )
   );

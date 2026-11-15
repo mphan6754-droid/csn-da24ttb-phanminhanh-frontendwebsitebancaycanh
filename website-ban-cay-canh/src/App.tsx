@@ -8,6 +8,7 @@ import GioHangPage from "./DLieuGioHangPage";
 import ThanhToan from "./ThanhToan";
 import TrangChu from "./TrangChu";
 import DonHang from "./DonHang";
+import Admin from "./Admin";
 
 function getCurrentPath() {
   return window.location.pathname.replace(/\/+$/, "") || "/";
@@ -61,7 +62,9 @@ function App() {
 
   return (
     <QuanLyGioHang>
-      {path === "/" ? (
+      {path === "/admin" ? (
+        <Admin />
+      ) : path === "/" ? (
         <TrangChu />
       ) : path === "/gioi-thieu" ? (
         <GioiThieu />
