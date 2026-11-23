@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CartMenu } from "./GioHang";
 import { cancelOrder, deleteOrder, loadOrders, type Order } from "./DlieuDonhangStorage";
+import { useAuth } from "./AuthContext";
+import { AccountMenu } from "./AuthPages";
 // Hàm formatPrice để định dạng giá tiền theo chuẩn Việt Nam
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("vi-VN", {
@@ -9,9 +11,10 @@ const formatPrice = (price: number) =>
   }).format(price);
 // Component DonHang hiển thị trang quản lý đơn hàng
 export default function DonHang() {
+  const { user } = useAuth();
   const [orderState, setOrderState] = useState(() => {
     try {
-      return { orders: loadOrders(), error: "" };
+      return { orders: loadOrders().filter((order) => order.userId === user?.id), error: "" };
     } catch (loadError) {
       console.error("Không thể đọc lịch sử đơn hàng:", loadError);
       return {
@@ -21,6 +24,22 @@ export default function DonHang() {
     }
   });
   const { orders, error } = orderState;
+  useEffect(() => {
+    const refresh = () => {
+      try {
+        setOrderState({ orders: loadOrders().filter((order) => order.userId === user?.id), error: "" });
+      } catch (loadError) {
+        console.error("Không thể cập nhật lịch sử đơn hàng:", loadError);
+        setOrderState({ orders: [], error: "Không thể tải lịch sử đơn hàng đã lưu trên trình duyệt." });
+      }
+    };
+    window.addEventListener("storage", refresh);
+    window.addEventListener("green-garden-store-change", refresh);
+    return () => {
+      window.removeEventListener("storage", refresh);
+      window.removeEventListener("green-garden-store-change", refresh);
+    };
+  }, [user?.id]);
 // Hàm xử lý xóa đơn hàng khỏi lịch sử mô phỏng
   const handleDeleteOrder = (orderCode: string) => {
     if (!window.confirm(`Bạn có chắc muốn xóa đơn ${orderCode} khỏi lịch sử mô phỏng?`)) {
@@ -77,6 +96,7 @@ export default function DonHang() {
             <a href="/san-pham" className="text-[#59645b] hover:text-[#314c39]">Sản phẩm</a>
             <a href="/gioi-thieu" className="text-[#59645b] hover:text-[#314c39]">Về chúng tôi</a>
             <CartMenu />
+            <AccountMenu />
           </nav>
         </div>
       </header>
@@ -108,7 +128,13 @@ export default function DonHang() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`rounded-full px-3 py-1 text-xs font-medium ${order.status === "cancelled" ? "bg-[#fbefed] text-[#9a564b]" : "bg-[#edf0e8] text-[#526a51]"}`}>
-                      {order.status === "cancelled" ? "Đã hủy" : "Đang xử lý"}
+                      {{
+                        pending: "Chờ xác nhận",
+                        confirmed: "Đã xác nhận",
+                        shipping: "Đang giao hàng",
+                        completed: "Đã giao hàng",
+                        cancelled: "Đã hủy",
+                      }[order.status]}
                     </span>
                     {order.status === "pending" && (
                       <button

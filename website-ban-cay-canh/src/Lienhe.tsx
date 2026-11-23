@@ -1,5 +1,5 @@
 import { useState, type SubmitEvent } from "react";
-import AccountMenu from "./Dangnhap/Dangky";
+import { AccountMenu } from "./AuthPages";
 import { CartMenu } from "./GioHang";
 
 function Lienhe() {

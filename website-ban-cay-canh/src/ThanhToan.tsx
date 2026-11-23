@@ -1,14 +1,15 @@
 import { useState, type SubmitEvent } from "react";
-import AccountMenu from "./Dangnhap/Dangky";
+import { AccountMenu } from "./AuthPages";
 import { useCart } from "./CartContext";
 import { CartMenu } from "./GioHang";
 import {
-  isValidShippingAddress,
-  isValidVietnameseMobilePhone,
-  isOrder,
   saveOrder,
+  deleteOrder,
   type Order,
 } from "./DlieuDonhangStorage";
+import { useAuth } from "./AuthContext";
+import { loadProducts, saveProducts } from "./GreenGardenStore";
+import type { Product } from "./SanPham";
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("vi-VN", {
@@ -18,16 +19,11 @@ const formatPrice = (price: number) =>
 
 export default function ThanhToan() {
   const { items, clearCart } = useCart();
+  const { user } = useAuth();
   const [savedOrder, setSavedOrder] = useState<Order | null>(null);
   const [submitError, setSubmitError] = useState("");
-  const [historyWarning, setHistoryWarning] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [nameError, setNameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [phone, setPhone] = useState("");
-  const [phoneError, setPhoneError] = useState("");
-  const [address, setAddress] = useState("");
-  const [addressError, setAddressError] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "transfer">("cod");
   // Tính toán tổng tiền, phí vận chuyển và tổng cộng
   const subtotal = items.reduce(
     (total, item) => total + item.price * item.quantity,
@@ -40,114 +36,74 @@ export default function ThanhToan() {
   const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (items.length === 0) return;
-    const form = event.currentTarget;
-    const nameInput = form.elements.namedItem("name");
-    const emailInput = form.elements.namedItem("email");
-    const phoneInput = form.elements.namedItem("phone");
-    const addressInput = form.elements.namedItem("address");
-    const formData = new FormData(form);
-    const nameValue = String(formData.get("name") ?? "").trim();
-    const phoneValue = String(formData.get("phone") ?? "").trim();
-    const addressValue = String(formData.get("address") ?? "").trim();
-    const nameValid = nameValue.length > 0;
-    const phoneValid = isValidVietnameseMobilePhone(phoneValue);
-    const addressValid = isValidShippingAddress(addressValue);
-    const emailValid =
-      emailInput instanceof HTMLInputElement && emailInput.validity.valid;
-    const emailMessage =
-      emailInput instanceof HTMLInputElement && emailInput.validity.valueMissing
-        ? "Vui lòng nhập địa chỉ email."
-        : "Email chưa đúng định dạng. Ví dụ: ten@domain.com.";
-    const nameMessage = "Vui lòng nhập họ và tên.";
-    const phoneMessage =
-      "Nhập số di động Việt Nam gồm đúng 10 chữ số với đầu số hợp lệ.";
-    const addressMessage =
-      "Nhập địa chỉ rõ hơn (ít nhất 10 ký tự và gồm từ 2 phần).";
-
-    if (nameInput instanceof HTMLInputElement) {
-      nameInput.setCustomValidity(nameValid ? "" : nameMessage);
-    }
-    if (phoneInput instanceof HTMLInputElement) {
-      phoneInput.setCustomValidity(phoneValid ? "" : phoneMessage);
-    }
-    if (emailInput instanceof HTMLInputElement) {
-      emailInput.setCustomValidity(emailValid ? "" : emailMessage);
-    }
-    if (addressInput instanceof HTMLTextAreaElement) {
-      addressInput.setCustomValidity(addressValid ? "" : addressMessage);
-    }
-    setNameError(nameValid ? "" : nameMessage);
-    setEmailError(emailValid ? "" : emailMessage);
-    setPhoneError(phoneValid ? "" : phoneMessage);
-    setAddressError(addressValid ? "" : addressMessage);
-    if (!nameValid || !emailValid || !phoneValid || !addressValid) {
-      form.reportValidity();
+    if (!user) {
+      setSubmitError("Vui lòng đăng nhập để đặt hàng.");
       return;
     }
-
-    if (!form.reportValidity()) return;
-    const order: Order = {
+    if (!user.address || user.address.trim().length < 10) {
+      setSubmitError("Vui lòng cập nhật địa chỉ nhận hàng trong tài khoản.");
+      return;
+    }
+    let order: Order;
+    let latestProducts: Product[];
+    try {
+      latestProducts = loadProducts();
+      const currentItems = items.map((item) => {
+        const product = latestProducts.find((current) => current.id === item.id);
+        if (!product) throw new Error(`Sản phẩm “${item.name}” không còn được bán.`);
+        if (item.quantity > product.stock) {
+          throw new Error(`Sản phẩm “${product.name}” hiện chỉ còn ${product.stock} sản phẩm.`);
+        }
+        return { id: product.id, name: product.name, price: product.price, quantity: item.quantity };
+      });
+      const currentSubtotal = currentItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const currentShipping = currentSubtotal >= 500000 || currentSubtotal === 0 ? 0 : 20000;
+      order = {
       code: `GG${Date.now().toString().slice(-8)}${Math.floor(Math.random() * 90 + 10)}`,
       createdAt: new Date().toISOString(),
       status: "pending",
+      userId: user?.id,
       recipient: {
-        name: nameValue,
-        email: String(formData.get("email") ?? "").trim(),
-        phone: phoneValue,
-        address: addressValue.replace(/\s+/g, " "),
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address.trim().replace(/\s+/g, " "),
       },
-      items: items.map(({ id, name, price, quantity }) => ({
-        id,
-        name,
-        price,
-        quantity,
-      })),
-      subtotal,
-      shipping,
-      total,
-    };
+      items: currentItems,
+      subtotal: currentSubtotal,
+      shipping: currentShipping,
+      total: currentSubtotal + currentShipping,
+      paymentMethod,
+      };
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Không thể kiểm tra tồn kho.");
+      return;
+    }
     setSubmitError("");
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(order),
-      });
-      const result: unknown = await response.json();
-      if (!response.ok) {
-        const errorMessage =
-          typeof result === "object" &&
-          result !== null &&
-          "error" in result &&
-          typeof result.error === "string"
-            ? result.error
-            : "Không thể gửi đơn hàng lên máy chủ.";
-        throw new Error(errorMessage);
-      }
-      if (!isOrder(result)) {
-        throw new Error("Máy chủ trả về đơn hàng không hợp lệ.");
-      }
-
+      saveOrder(order);
       try {
-        saveOrder(result);
+        const orderedQuantities = order.items.reduce<Record<number, number>>((totals, item) => {
+          totals[item.id] = (totals[item.id] ?? 0) + item.quantity;
+          return totals;
+        }, {});
+        saveProducts(latestProducts.map((product) => ({
+          ...product,
+          stock: Math.max(0, product.stock - (orderedQuantities[product.id] ?? 0)),
+        })));
       } catch (error) {
-        console.error(
-          "Đơn đã lưu máy chủ nhưng không lưu được lịch sử cục bộ:",
-          error
-        );
-        setHistoryWarning(
-          "Đơn đã được gửi, nhưng lịch sử đơn hàng trên trình duyệt này không lưu được."
-        );
+        deleteOrder(order.code);
+        throw error;
       }
-      setSavedOrder(result);
+      setSavedOrder(order);
       clearCart();
     } catch (error) {
-      console.error("Không thể gửi đơn hàng lên máy chủ:", error);
+      console.error("Không thể lưu đơn hàng vào LocalStorage:", error);
       setSubmitError(
         error instanceof Error
           ? error.message
-          : "Không thể gửi đơn hàng. Vui lòng thử lại."
+          : "Không thể lưu đơn hàng. Vui lòng thử lại."
       );
     } finally {
       setIsSubmitting(false);
@@ -180,7 +136,7 @@ export default function ThanhToan() {
             <div className="mt-3 leading-7 text-[#687168]">
               Mã đơn hàng: <strong>{savedOrder.code}</strong>.
               <br />
-              Đơn hàng đã được lưu thành công. Cửa hàng sẽ sớm xác nhận với bạn.
+              Đơn hàng đã được lưu trong trình duyệt. Cửa hàng sẽ sớm xác nhận với bạn.
             </div>
             <div className="mt-6 grid gap-6 border-y border-[#e7e5dc] py-6 sm:grid-cols-2">
               <div>
@@ -206,11 +162,6 @@ export default function ThanhToan() {
               <span>Tổng cộng</span><span className="text-[#314c39]">{formatPrice(savedOrder.total)}</span>
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              {historyWarning && (
-                <p role="status" className="w-full text-sm text-amber-800">
-                  {historyWarning}
-                </p>
-              )}
               <a href="/don-hang" className="inline-flex rounded-full bg-[#314c39] px-6 py-3 text-sm font-semibold text-white hover:bg-[#243c2c]">Xem đơn hàng của tôi</a>
               <a href="/san-pham" className="inline-flex rounded-full border border-[#d7dbd0] px-6 py-3 text-sm font-semibold text-[#314c39] hover:bg-[#edf0e8]">Tiếp tục mua sắm</a>
             </div>
@@ -225,103 +176,28 @@ export default function ThanhToan() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#78836f]">GREEN GARDEN</p>
             <h1 className="mt-3 font-serif text-4xl text-[#263b2d]">Thông tin thanh toán</h1>
             <p className="mt-3 text-sm leading-6 text-[#747a70]">
-              Đơn hàng sẽ được lưu vào hệ thống. Thanh toán trực tuyến chưa được kết nối.
+              Đơn hàng được lưu trên trình duyệt này. Thanh toán trực tuyến chưa được kết nối.
             </p>
             <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
               <form noValidate onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-[#e2e0d7] bg-white p-6 sm:p-8">
                 <h2 className="font-serif text-2xl text-[#314c39]">Thông tin nhận hàng</h2>
-                <div>
-                  <label htmlFor="checkout-name" className="mb-1 block text-sm font-medium">Họ và tên</label>
-                  <input
-                    id="checkout-name"
-                    name="name"
-                    autoComplete="name"
-                    onChange={(event) => {
-                      setNameError("");
-                      event.currentTarget.setCustomValidity("");
-                    }}
-                    aria-invalid={Boolean(nameError)}
-                    aria-describedby={nameError ? "checkout-name-error" : undefined}
-                    required
-                    className="w-full rounded-xl border border-[#deded4] px-3 py-3 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
-                  />
-                  {nameError && <p id="checkout-name-error" role="alert" className="mt-1 text-sm text-red-700">{nameError}</p>}
-                </div>
-                <div>
-                  <label htmlFor="checkout-email" className="mb-1 block text-sm font-medium">Email</label>
-                  <input
-                    id="checkout-email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    onChange={(event) => {
-                      setEmailError("");
-                      event.currentTarget.setCustomValidity("");
-                    }}
-                    aria-invalid={Boolean(emailError)}
-                    aria-describedby={emailError ? "checkout-email-error" : undefined}
-                    required
-                    className="w-full rounded-xl border border-[#deded4] px-3 py-3 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
-                  />
-                  {emailError && <p id="checkout-email-error" role="alert" className="mt-1 text-sm text-red-700">{emailError}</p>}
-                </div>
-                <div>
-                  <label htmlFor="checkout-phone" className="mb-1 block text-sm font-medium">Số điện thoại</label>
-                  <input
-                    id="checkout-phone"
-                    name="phone"
-                    type="tel"
-                    autoComplete="tel-national"
-                    inputMode="numeric"
-                    pattern="0(?:3[2-9]|5[25689]|7[06789]|8[1-9]|9[0-46-9])[0-9]{7}"
-                    maxLength={10}
-                    placeholder="0912345678"
-                    title="Nhập số di động Việt Nam gồm đúng 10 chữ số, bắt đầu bằng 03, 05, 07, 08 hoặc 09."
-                    value={phone}
-                    onChange={(event) => {
-                      setPhone(event.currentTarget.value.replace(/[^0-9]/g, "").slice(0, 10));
-                      setPhoneError("");
-                      event.currentTarget.setCustomValidity("");
-                    }}
-                    aria-invalid={Boolean(phoneError)}
-                    aria-describedby={phoneError ? "checkout-phone-error" : undefined}
-                    required
-                    className="w-full rounded-xl border border-[#deded4] px-3 py-3 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
-                  />
-                  {phoneError && <p id="checkout-phone-error" role="alert" className="mt-1 text-sm text-red-700">{phoneError}</p>}
-                  <p className="mt-1 text-xs text-[#747a70]">Nhập 10 chữ số, bắt đầu bằng 03, 05, 07, 08 hoặc 09.</p>
-                </div>
-                <div>
-                  <label htmlFor="checkout-address" className="mb-1 block text-sm font-medium">Địa chỉ nhận hàng</label>
-                  <textarea
-                    id="checkout-address"
-                    name="address"
-                    autoComplete="street-address"
-                    rows={3}
-                    minLength={10}
-                    value={address}
-                    onChange={(event) => {
-                      setAddress(event.currentTarget.value);
-                      setAddressError("");
-                      event.currentTarget.setCustomValidity("");
-                    }}
-                    aria-invalid={Boolean(addressError)}
-                    aria-describedby={addressError ? "checkout-address-error" : undefined}
-                    required
-                    className="w-full rounded-xl border border-[#deded4] px-3 py-3 outline-none focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
-                  />
-                  {addressError && <p id="checkout-address-error" role="alert" className="mt-1 text-sm text-red-700">{addressError}</p>}
-                  <p className="mt-1 text-xs text-[#747a70]">Nhập địa chỉ cụ thể, tối thiểu 10 ký tự (ví dụ: số nhà, đường/ấp, phường/xã).</p>
-                </div>
-                {/* Hiển thị các phương thức thanh toán mô phỏng */}
+                {user && (
+                  <div className="rounded-xl bg-[#f7f8f3] p-4 text-sm leading-6 text-[#59645b]">
+                    <p><strong className="text-[#314c39]">{user.name}</strong></p>
+                    <p>{user.phone}</p>
+                    <p>{user.email}</p>
+                    <p>{user.address}</p>
+                    <a href="/tai-khoan" className="mt-2 inline-block font-semibold text-[#47764f] hover:underline">Cập nhật thông tin nhận hàng</a>
+                  </div>
+                )}
                 <fieldset>
                   <legend className="mb-2 text-sm font-medium">Phương thức thanh toán</legend>
                   <label className="flex items-center gap-3 rounded-xl border border-[#deded4] p-3 text-sm">
-                    <input type="radio" name="payment" value="cod" defaultChecked />
+                    <input type="radio" name="payment" value="cod" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} />
                     Thanh toán khi nhận hàng
                   </label>
                   <label className="mt-2 flex items-center gap-3 rounded-xl border border-[#deded4] p-3 text-sm">
-                    <input type="radio" name="payment" value="transfer" />
+                    <input type="radio" name="payment" value="transfer" checked={paymentMethod === "transfer"} onChange={() => setPaymentMethod("transfer")} />
                     Chuyển khoản
                   </label>
                 </fieldset>

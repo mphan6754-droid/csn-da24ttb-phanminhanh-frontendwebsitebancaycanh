@@ -22,7 +22,7 @@ export default function TheSanPham({
 }) {
   const { addToCart, items } = useCart();
   const [added, setAdded] = useState(false);
-  const image = getProductImage(product.id);
+  const image = product.image || getProductImage(product.id);
   const cartQuantity = items.find((item) => item.id === product.id)?.quantity ?? 0;
   const isOutOfStock = cartQuantity >= product.stock;
   const addProductToCart = () => {

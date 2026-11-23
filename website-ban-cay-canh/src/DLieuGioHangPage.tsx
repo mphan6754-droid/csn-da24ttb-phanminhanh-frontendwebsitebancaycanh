@@ -1,4 +1,4 @@
-import AccountMenu from "./Dangnhap/Dangky";
+import { AccountMenu } from "./AuthPages";
 import { useCart } from "./CartContext";
 import { CartMenu } from "./GioHang";
 // Hàm formatPrice để định dạng giá sản phẩm theo định dạng tiền tệ Việt Nam

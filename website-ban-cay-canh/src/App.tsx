@@ -9,13 +9,20 @@ import ThanhToan from "./ThanhToan";
 import TrangChu from "./TrangChu";
 import DonHang from "./DonHang";
 import Admin from "./Admin";
+import { AuthPage } from "./AuthPages";
+import TaiKhoan from "./TaiKhoan";
+import { useAuth } from "./AuthContext";
+import { initializeLocalStore } from "./GreenGardenStore";
+import { productGroups, products as seedProducts } from "./SanPham";
 
 function getCurrentPath() {
   return window.location.pathname.replace(/\/+$/, "") || "/";
 }
 
 function App() {
+  initializeLocalStore(seedProducts, productGroups);
   const [path, setPath] = useState(getCurrentPath);
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleLocationChange = () => {
@@ -59,11 +66,18 @@ function App() {
   }, []);
 
   const productDetailMatch = path.match(/^\/san-pham\/(\d+)$/);
+  const requiresUser = path === "/don-hang" || path === "/thanh-toan" || path === "/tai-khoan";
 
   return (
     <QuanLyGioHang>
-      {path === "/admin" ? (
+      {requiresUser && !user ? (
+        <RequireUser />
+      ) : path === "/admin" ? (
         <Admin />
+      ) : path === "/dang-nhap" ? (
+        <AuthPage />
+      ) : path === "/tai-khoan" ? (
+        <TaiKhoan />
       ) : path === "/" ? (
         <TrangChu />
       ) : path === "/gioi-thieu" ? (
@@ -85,6 +99,14 @@ function App() {
       )}
     </QuanLyGioHang>
   );
+}
+
+function RequireUser() {
+  useEffect(() => {
+    const destination = `${window.location.pathname}${window.location.search}`;
+    window.location.replace(`/dang-nhap?returnTo=${encodeURIComponent(destination)}`);
+  }, []);
+  return <main className="p-8 text-center text-[#526254]">Đang chuyển đến trang đăng nhập...</main>;
 }
 
 export default App;

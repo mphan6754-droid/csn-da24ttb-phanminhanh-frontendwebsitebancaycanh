@@ -8,6 +8,7 @@ export type OrderStatus =
 export type Order = {
   // Mã đơn hàng
   code: string;
+  userId?: string;
   createdAt: string;
   status: OrderStatus;
   recipient: {
@@ -26,9 +27,10 @@ export type Order = {
   subtotal: number;
   shipping: number;
   total: number;
+  paymentMethod?: "cod" | "transfer";
 };
 // Khóa lưu trữ đơn hàng trong localStorage
-const STORAGE_KEY = "green-garden-orders";
+const STORAGE_KEY = "gg_orders";
 const vietnameseMobilePhonePattern =
   /^0(?:3[2-9]|5[25689]|7[06789]|8[1-9]|9[0-46-9])[0-9]{7}$/;
 
@@ -51,6 +53,7 @@ export function isOrder(value: unknown): value is Order {
   const order = value as Partial<Order>;
   return (
     typeof order.code === "string" &&
+    (order.userId === undefined || typeof order.userId === "string") &&
     typeof order.createdAt === "string" &&
     (order.status === undefined ||
       order.status === "pending" ||
@@ -66,12 +69,19 @@ export function isOrder(value: unknown): value is Order {
     Array.isArray(order.items) &&
     typeof order.subtotal === "number" &&
     typeof order.shipping === "number" &&
-    typeof order.total === "number"
+    typeof order.total === "number" &&
+    (order.paymentMethod === undefined ||
+      order.paymentMethod === "cod" ||
+      order.paymentMethod === "transfer")
   );
 }
 // Tải danh sách đơn hàng từ localStorage
 export function loadOrders(): Order[] {
-  const savedOrders = localStorage.getItem(STORAGE_KEY);
+  let savedOrders = localStorage.getItem(STORAGE_KEY);
+  if (savedOrders === null) {
+    savedOrders = localStorage.getItem("green-garden-orders");
+    if (savedOrders !== null) localStorage.setItem(STORAGE_KEY, savedOrders);
+  }
   if (!savedOrders) return [];
 // Nếu không có dữ liệu đơn hàng trong localStorage, trả về mảng rỗng
   const parsed: unknown = JSON.parse(savedOrders);
@@ -104,6 +114,7 @@ export function saveOrder(order: Order) {
   }
   const orders = loadOrders();
   localStorage.setItem(STORAGE_KEY, JSON.stringify([order, ...orders]));
+  window.dispatchEvent(new CustomEvent("green-garden-store-change", { detail: { key: STORAGE_KEY } }));
 }
 // Xóa đơn hàng theo mã đơn hàng
 export function deleteOrder(orderCode: string) {
@@ -112,6 +123,7 @@ export function deleteOrder(orderCode: string) {
     STORAGE_KEY,
     JSON.stringify(orders.filter((order) => order.code !== orderCode))
   );
+  window.dispatchEvent(new CustomEvent("green-garden-store-change", { detail: { key: STORAGE_KEY } }));
 }
 // Hủy đơn hàng theo mã đơn hàng, thay đổi trạng thái thành "cancelled"
 export function cancelOrder(orderCode: string) {
@@ -131,4 +143,5 @@ export function updateOrderStatus(orderCode: string, status: OrderStatus) {
       )
     )
   );
+  window.dispatchEvent(new CustomEvent("green-garden-store-change", { detail: { key: STORAGE_KEY } }));
 }

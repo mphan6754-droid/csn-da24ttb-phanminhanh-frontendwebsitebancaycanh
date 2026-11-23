@@ -1,13 +1,11 @@
 import { useState } from "react";
-import AccountMenu from "./Dangnhap/Dangky";
+import { AccountMenu } from "./AuthPages";
 import { CartMenu } from "./GioHang";
 import TheSanPham from "./TheSanPham";  
-import { favoriteProductIds, productGroups, products } from "./SanPham";
+import { favoriteProductIds } from "./SanPham";
 import { loadProductSales } from "./DlieuDonhangStorage";
+import { useStoreCategories, useStoreProducts } from "./GreenGardenStore";
 
-const featuredProducts = products.filter((product) =>
-  [1, 6, 9, 11].includes(product.id)
-);
 // Mô tả cho từng nhóm sản phẩm
 const groupDescriptions: Record<string, string> = {
   "Cây mini": "Chậu cây nhỏ xinh, phù hợp với bàn học và bàn làm việc.",
@@ -17,6 +15,11 @@ const groupDescriptions: Record<string, string> = {
 };
 // Component TrangChu hiển thị trang chủ của website bán cây cảnh
 export default function TrangChu() {
+  const currentProducts = useStoreProducts();
+  const categories = useStoreCategories();
+  const featuredProducts = currentProducts.filter((product) =>
+    [1, 6, 9, 11].includes(product.id)
+  );
   const [salesState] = useState(() => {
     try {
       return { counts: loadProductSales(), error: "" };
@@ -88,7 +91,7 @@ export default function TrangChu() {
             <a href="/san-pham" className="text-sm font-semibold text-[#526a51] hover:underline">Xem tất cả →</a>
           </div>
           <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {productGroups.map((group, index) => (
+            {categories.map((group, index) => (
               <a
                 key={group}
                 href={`/san-pham?group=${encodeURIComponent(group)}`}
@@ -96,7 +99,7 @@ export default function TrangChu() {
               >
                 <span className="font-serif text-2xl text-[#8b9b80]">0{index + 1}</span>
                 <h3 className="mt-4 font-semibold text-[#314c39]">{group}</h3>
-                <p className="mt-2 text-sm leading-6 text-[#747a70]">{groupDescriptions[group]}</p>
+                <p className="mt-2 text-sm leading-6 text-[#747a70]">{groupDescriptions[group] ?? "Khám phá sản phẩm thuộc danh mục này."}</p>
               </a>
             ))}
           </div>

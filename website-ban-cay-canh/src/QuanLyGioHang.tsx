@@ -1,14 +1,19 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { CartContext, type CartProduct } from "./CartContext";
+import { STORAGE_KEYS } from "./GreenGardenStore";
 // Định nghĩa kiểu dữ liệu cho một sản phẩm trong giỏ hàng, bao gồm thông tin cơ bản và số lượng
 type CartItem = CartProduct & {
   quantity: number;
 };
 // Khởi tạo key để lưu trữ giỏ hàng trong localStorage
-const STORAGE_KEY = "green-garden-cart";
+const STORAGE_KEY = STORAGE_KEYS.cart;
 // Hàm loadCart để tải giỏ hàng từ localStorage
 function loadCart(): CartItem[] {
-  const savedCart = localStorage.getItem(STORAGE_KEY);
+  let savedCart = localStorage.getItem(STORAGE_KEY);
+  if (savedCart === null) {
+    savedCart = localStorage.getItem("green-garden-cart");
+    if (savedCart !== null) localStorage.setItem(STORAGE_KEY, savedCart);
+  }
   if (!savedCart) return [];
 // Nếu không có dữ liệu giỏ hàng trong localStorage, trả về mảng rỗng
   try {
@@ -39,10 +44,19 @@ export function QuanLyGioHang({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      window.dispatchEvent(new CustomEvent("green-garden-store-change", { detail: { key: STORAGE_KEY } }));
     } catch (error) {
       console.error("Không thể lưu giỏ hàng trên trình duyệt:", error);
     }
   }, [items]);
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEY) setItems(loadCart());
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   const addToCart = (product: CartProduct) => {
     // Cập nhật giỏ hàng: nếu sản phẩm đã có trong giỏ, tăng số lượng; nếu chưa, thêm sản phẩm mới với số lượng 1

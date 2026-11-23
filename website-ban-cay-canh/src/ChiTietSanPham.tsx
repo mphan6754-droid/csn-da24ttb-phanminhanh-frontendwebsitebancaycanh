@@ -1,7 +1,8 @@
-import AccountMenu from "./Dangnhap/Dangky";
+import { AccountMenu } from "./AuthPages";
 import { useCart } from "./CartContext";
 import { CartMenu } from "./GioHang";
-import { getProductImage, products } from "./SanPham";
+import { getProductImage } from "./SanPham";
+import { useStoreProducts } from "./GreenGardenStore";
 // Hàm formatPrice để định dạng giá sản phẩm theo định dạng tiền tệ Việt Nam
 const formatPrice = (price: number) =>
   new Intl.NumberFormat("vi-VN", {
@@ -10,6 +11,7 @@ const formatPrice = (price: number) =>
   }).format(price);
 // Component ChiTietSanPham hiển thị chi tiết sản phẩm dựa trên productId
 export default function ChiTietSanPham({ productId }: { productId: number }) {
+  const products = useStoreProducts();
   const product = products.find((item) => item.id === productId);
   const { addToCart, items } = useCart();
 // Nếu không tìm thấy sản phẩm, hiển thị thông báo lỗi và liên kết quay lại danh sách sản phẩm
@@ -22,7 +24,7 @@ export default function ChiTietSanPham({ productId }: { productId: number }) {
     );
   }
 // Nếu tìm thấy sản phẩm, hiển thị chi tiết sản phẩm bao gồm hình ảnh, tên, giá, mô tả và thông tin chăm sóc hoặc sử dụng
-  const image = getProductImage(product.id);
+  const image = product.image || getProductImage(product.id);
   const isPlant = product.group !== "Dụng cụ chăm sóc";
   const cartQuantity = items.find((item) => item.id === product.id)?.quantity ?? 0;
   const isOutOfStock = cartQuantity >= product.stock;

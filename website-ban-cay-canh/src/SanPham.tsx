@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import AccountMenu from "./Dangnhap/Dangky";
+import { AccountMenu } from "./AuthPages";
 import { CartMenu } from "./GioHang";
 import TheSanPham from "./TheSanPham";
 import { loadProductSales } from "./DlieuDonhangStorage";
+import { useStoreCategories, useStoreProducts } from "./GreenGardenStore";
 
 export type Product = {
   id: number;
@@ -18,6 +19,7 @@ export type Product = {
   care: string;
   size: string;
   placement?: string;
+  image?: string;
 };
 
 const productCatalog = [
@@ -618,9 +620,14 @@ export const getProductImage = (productId: number) => productImages[productId];
 
 export default function SanPham() {
   const [search, setSearch] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sortBy, setSortBy] = useState("priceAsc");
+  const currentProducts = useStoreProducts();
+  const categories = useStoreCategories();
   const [category, setCategory] = useState(() => {
     const requestedGroup = new URLSearchParams(window.location.search).get("group");
-    return productGroups.find((group) => group === requestedGroup) ?? "all";
+    return requestedGroup ?? "all";
   });
   const [salesState] = useState(() => {
     try {
@@ -647,8 +654,10 @@ export default function SanPham() {
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
+    const minimum = minPrice === "" ? 0 : Number(minPrice);
+    const maximum = maxPrice === "" ? Infinity : Number(maxPrice);
 
-    return products.filter((item) => {
+    const matchingProducts = currentProducts.filter((item) => {
       const matchesSearch = item.name
         .toLowerCase()
         .includes(normalizedSearch);
@@ -656,9 +665,18 @@ export default function SanPham() {
       const matchesCategory =
         category === "all" || item.group === category;
 
-      return matchesSearch && matchesCategory;
+      const matchesPrice =
+        item.price >= minimum &&
+        item.price <= maximum;
+
+      return matchesSearch && matchesCategory && matchesPrice;
     });
-  }, [category, search]);
+
+    return [...matchingProducts].sort((a, b) => {
+      if (sortBy === "priceDesc") return b.price - a.price;
+      return a.price - b.price;
+    });
+  }, [category, currentProducts, maxPrice, minPrice, search, sortBy]);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f8f7f2] text-[#27352c]">
@@ -706,7 +724,8 @@ export default function SanPham() {
           <p className="text-sm text-[#7b8177]">Được chọn lọc để dễ chăm mỗi ngày.</p>
         </div>
 
-        <div className="mb-7 flex flex-col gap-3 sm:flex-row">
+        <div className="mb-7 grid gap-3 md:grid-cols-[minmax(16rem,1fr)_12rem]">
+          <div className="grid gap-3 sm:grid-cols-[minmax(12rem,1fr)_10rem_10rem]">
           <div className="flex-1">
             <label htmlFor="search" className="sr-only">
               Tìm kiếm sản phẩm
@@ -722,6 +741,33 @@ export default function SanPham() {
             />
           </div>
           <div>
+            <label htmlFor="min-price" className="sr-only">Giá thấp nhất</label>
+            <input
+              id="min-price"
+              type="number"
+              min="0"
+              step="1000"
+              placeholder="Giá từ"
+              value={minPrice}
+              onChange={(event) => setMinPrice(event.target.value)}
+              className="w-full rounded-xl border border-[#deded4] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-[#9a9e93] focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
+            />
+          </div>
+          <div>
+            <label htmlFor="max-price" className="sr-only">Giá cao nhất</label>
+            <input
+              id="max-price"
+              type="number"
+              min="0"
+              step="1000"
+              placeholder="Giá đến"
+              value={maxPrice}
+              onChange={(event) => setMaxPrice(event.target.value)}
+              className="w-full rounded-xl border border-[#deded4] bg-white px-4 py-3 text-sm outline-none transition placeholder:text-[#9a9e93] focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
+            />
+          </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-1">
             <label htmlFor="category" className="sr-only">
               Danh mục sản phẩm
             </label>
@@ -734,11 +780,21 @@ export default function SanPham() {
             >
               <option value="all">Tất cả nhóm sản phẩm</option>
 
-              {productGroups.map((group) => (
+              {categories.map((group) => (
                 <option key={group} value={group}>
                   {group}
                 </option>
               ))}
+            </select>
+            <label htmlFor="sort-by" className="sr-only">Sắp xếp sản phẩm</label>
+            <select
+              id="sort-by"
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value)}
+              className="w-full rounded-xl border border-[#deded4] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#6f866f] focus:ring-2 focus:ring-[#e5e9df]"
+            >
+              <option value="priceAsc">Giá: thấp đến cao</option>
+              <option value="priceDesc">Giá: cao đến thấp</option>
             </select>
           </div>
         </div>
